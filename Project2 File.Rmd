@@ -10,6 +10,75 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 Start playing around with functions and queries.
 ```{r}
+library(httr)
+library(dplyr)
+library(jsonlite)
+my_beer <- GET("https://api.openbrewerydb.org/breweries?by_name=cooper")
+str(my_beer, max.level=1)
+parsed <- fromJSON(rawToChar(my_beer$content))
+str(parsed, max.level=1)
+summary_info <- as_tibble(parsed %>% select(id, name, state))
 
+# Allow user to select a word in name and optional argument of number of results
+name_search <- function(name, num_results=NA){
+  name <- tolower(name)
+  if (is.numeric(num_results)){
+    search_num <- paste0("&per_page=", num_results)
+   search_url <- paste0("https://api.openbrewerydb.org/breweries?by_name=", name, search_num)
+  }
+  else { 
+    search_url <- paste0("https://api.openbrewerydb.org/breweries?by_name=", name)
+  }
+  search_run <- GET(search_url)
+}
+
+#Run a test case
+test_case <- name_search(name="city")
+parsed <- fromJSON(rawToChar(test_case$content))
+str(parsed, max.level=1)
+summary_info_test <- as_tibble(parsed %>% select(id, name, state, city, brewery_type))
+
+#Function to search by type with an option for number of results
+type_search <- function(type, num_results=NA){
+  type <- tolower(type)
+  if (is.numeric(num_results)){
+    search_num <- paste0("&per_page=", num_results)
+   search_url <- paste0("https://api.openbrewerydb.org/breweries?by_type=", type, search_num)
+  }
+  else { 
+    search_url <- paste0("https://api.openbrewerydb.org/breweries?by_type=", type)
+  }
+  search_run <- GET(search_url)
+}
+
+test_case2 <- type_search(type="Regional", 4)
+parsed2 <- fromJSON(rawToChar(test_case2$content))
+str(parsed2, max.level=1)
+summary_info_test2 <- as_tibble(parsed2 %>% select(id, name, state, city, brewery_type))
+
+#Function to convert state abbreviations to full state names. Finish out with all of the states if this is a functionality we want to have.
+state_conversion <- function(state){
+  ifelse(state = "AL", state_name = "Alabama", ifelse(state = "AK", state_name = "Alaska",   ifelse(state="AZ", state_name = "Arizona", ifelse(state= "AK", state_name = "Arkansas", state_name=state))))
+}
+  
+state_search <- function(state_name, num_results=NA){
+  state_name <- tolower(state_name)
+  state_name <- sub(" ", "_", state_name)
+  if (is.numeric(num_results)){
+    search_num <- paste0("&per_page=", num_results)
+   search_url <- paste0("https://api.openbrewerydb.org/breweries?by_state=", state_name, search_num)
+  }
+  else { 
+    search_url <- paste0("https://api.openbrewerydb.org/breweries?by_state=", state_name)
+  }
+  search_run <- GET(search_url)
+}
+
+#Test it out
+test_case3 <- state_search(state_name = "New York", 10)
+parsed3 <- fromJSON(rawToChar(test_case3$content))
+str(parsed3, max.level=1)
+summary_info_test3 <- as_tibble(parsed3 %>% select(id, name, state, city, brewery_type))
+ 
 ```
 
