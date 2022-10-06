@@ -13,6 +13,7 @@ Start playing around with functions and queries.
 library(httr)
 library(dplyr)
 library(jsonlite)
+library(tidyverse)
 my_beer <- GET("https://api.openbrewerydb.org/breweries?by_name=cooper")
 str(my_beer, max.level=1)
 parsed <- fromJSON(rawToChar(my_beer$content))
@@ -79,6 +80,97 @@ test_case3 <- state_search(state_name = "New York", 10)
 parsed3 <- fromJSON(rawToChar(test_case3$content))
 str(parsed3, max.level=1)
 summary_info_test3 <- as_tibble(parsed3 %>% select(id, name, state, city, brewery_type))
- 
+
+#Goal of the next section is to create of function that takes a state, runs queries for all of the brewery types with the plan of plotting a barchart of the results. This gets long because of the maximum of 50 results per search.
+
+type_count <- function(state_name){
+  state_name <- tolower(state_name)
+  state_name <- sub(" ", "_", state_name)
+  search_url_micro <- paste0("https://api.openbrewerydb.org/breweries?by_state=", state_name, "&by_type=micro&per_page=50")
+  search_run_micro <- GET(search_url_micro)
+  parsed_micro <- fromJSON(rawToChar(search_run_micro$content))
+  total_micro <- nrow(parsed_micro)
+  if(total_micro==50){search_url_micro2 <- paste0("https://api.openbrewerydb.org/breweries?by_state=", state_name, "&by_type=micro&page=2&per_page=50")
+  search_run_micro2 <- GET(search_url_micro2)
+  parsed_micro2 <- fromJSON(rawToChar(search_run_micro2$content))
+  total_micro <- nrow(parsed_micro2) + total_micro}
+  if(total_micro==100){search_url_micro3 <- paste0("https://api.openbrewerydb.org/breweries?by_state=", state_name, "&by_type=micro&page=3&per_page=50")
+  search_run_micro3 <- GET(search_url_micro3)
+  parsed_micro3 <- fromJSON(rawToChar(search_run_micro3$content))
+  total_micro <- nrow(parsed_micro3) + total_micro}
+  if(total_micro==150){search_url_micro4 <- paste0("https://api.openbrewerydb.org/breweries?by_state=", state_name, "&by_type=micro&page=4&per_page=50")
+  search_run_micro4 <- GET(search_url_micro4)
+  parsed_micro4 <- fromJSON(rawToChar(search_run_micro4$content))
+  total_micro <- nrow(parsed_micro4) + total_micro}
+  #may need to  use if logic or a while loop to get all results for micro
+  search_url_nano <- paste0("https://api.openbrewerydb.org/breweries?by_state=", state_name, "&by_type=nano&per_page=50")
+  if(total_micro==200){search_url_micro5 <- paste0("https://api.openbrewerydb.org/breweries?by_state=", state_name, "&by_type=micro&page=5&per_page=50")
+  search_run_micro5 <- GET(search_url_micro5)
+  parsed_micro5 <- fromJSON(rawToChar(search_run_micro5$content))
+  total_micro <- nrow(parsed_micro5) + total_micro}
+  search_run_nano <- GET(search_url_nano)
+  parsed_nano <- fromJSON(rawToChar(search_run_nano$content))
+  total_nano <- nrow(parsed_nano)
+  if(total_micro==250){search_url_micro6 <- paste0("https://api.openbrewerydb.org/breweries?by_state=", state_name, "&by_type=micro&page=6&per_page=50")
+  search_run_micro6 <- GET(search_url_micro6)
+  parsed_micro6 <- fromJSON(rawToChar(search_run_micro6$content))
+  total_micro <- nrow(parsed_micro6) + total_micro}
+  if(total_micro==300){search_url_micro7 <- paste0("https://api.openbrewerydb.org/breweries?by_state=", state_name, "&by_type=micro&page=7&per_page=50")
+  search_run_micro7 <- GET(search_url_micro7)
+  parsed_micro7 <- fromJSON(rawToChar(search_run_micro7$content))
+  total_micro <- nrow(parsed_micro7) + total_micro}
+  if(total_micro==350){search_url_micro8 <- paste0("https://api.openbrewerydb.org/breweries?by_state=", state_name, "&by_type=micro&page=8&per_page=50")
+  search_run_micro8 <- GET(search_url_micro8)
+  parsed_micro8 <- fromJSON(rawToChar(search_run_micro8$content))
+  total_micro <- nrow(parsed_micro8) + total_micro}
+  if(total_micro==400){search_url_micro9 <- paste0("https://api.openbrewerydb.org/breweries?by_state=", state_name, "&by_type=micro&page=9&per_page=50")
+  search_run_micro9 <- GET(search_url_micro9)
+  parsed_micro9 <- fromJSON(rawToChar(search_run_micro9$content))
+  total_micro <- nrow(parsed_micro9) + total_micro}
+  if(total_micro==450){search_url_micro10 <- paste0("https://api.openbrewerydb.org/breweries?by_state=", state_name, "&by_type=micro&page=10&per_page=50")
+  search_run_micro10 <- GET(search_url_micro10)
+  parsed_micro10 <- fromJSON(rawToChar(search_run_micro10$content))
+  total_micro <- nrow(parsed_micro10) + total_micro}
+  #May need to add lines to deal with when there are no nano brewweries, leave out nano, or add to another category. There are only 4 nano breweries total.
+   search_url_regional <- paste0("https://api.openbrewerydb.org/breweries?by_state=", state_name, "&by_type=regional&per_page=50")
+  search_run_regional <- GET(search_url_regional)
+  parsed_regional <- fromJSON(rawToChar(search_run_regional$content))
+  total_regional <- nrow(parsed_regional)
+   search_url_brewpub <- paste0("https://api.openbrewerydb.org/breweries?by_state=", state_name, "&by_type=brewpub&per_page=50")
+  search_run_brewpub <- GET(search_url_brewpub)
+  parsed_brewpub <- fromJSON(rawToChar(search_run_brewpub$content))
+  total_brewpub <- nrow(parsed_brewpub)
+  search_url_brewpub2 <- paste0("https://api.openbrewerydb.org/breweries?by_state=", state_name, "&by_type=brewpub&page=2&per_page=50")
+  search_run_brewpub2 <- GET(search_url_brewpub2)
+  parsed_brewpub2 <- fromJSON(rawToChar(search_run_brewpub2$content))
+  total_brewpub <- nrow(parsed_brewpub2) + total_brewpub
+  search_url_brewpub3 <- paste0("https://api.openbrewerydb.org/breweries?by_state=", state_name, "&by_type=brewpub&page=3&per_page=50")
+  search_run_brewpub3 <- GET(search_url_brewpub3)
+  parsed_brewpub3 <- fromJSON(rawToChar(search_run_brewpub3$content))
+  total_brewpub <- nrow(parsed_brewpub3) + total_brewpub
+  search_url_brewpub4 <- paste0("https://api.openbrewerydb.org/breweries?by_state=", state_name, "&by_type=brewpub&page=4&per_page=50")
+  search_run_brewpub4 <- GET(search_url_brewpub4)
+  parsed_brewpub4 <- fromJSON(rawToChar(search_run_brewpub4$content))
+  total_brewpub <- nrow(parsed_brewpub4) + total_brewpub
+  search_url_brewpub5 <- paste0("https://api.openbrewerydb.org/breweries?by_state=", state_name, "&by_type=brewpub&page=5&per_page=50")
+  search_run_brewpub5 <- GET(search_url_brewpub5)
+  parsed_brewpub5 <- fromJSON(rawToChar(search_run_brewpub5$content))
+  total_brewpub <- nrow(parsed_brewpub5) + total_brewpub
+   search_url_large <- paste0("https://api.openbrewerydb.org/breweries?by_state=", state_name, "&by_type=large&per_page=50")
+  search_run_large <- GET(search_url_large)
+  parsed_large <- fromJSON(rawToChar(search_run_large$content))
+  total_large <- nrow(parsed_large)
+  return(list(micro=total_micro, nano=total_nano, regional=total_regional, brewpub=total_brewpub, large=total_large))
+}
+
+test_case4 <- type_count("california")
+
+
+
+
+#Just a test search to throw different options in
+test <- GET("https://api.openbrewerydb.org/breweries?by_state=california&by_type=brewpub&page=5&per_page=50") 
+parsed_test <- fromJSON(rawToChar(test$content))
+summary_info_test <- as_tibble(parsed_test %>% select(id, name, state, city, brewery_type))
 ```
 
