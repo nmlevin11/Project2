@@ -71,11 +71,6 @@ search_by_state <- function(state){
 #California
 ```
 
-
-```{r}
-
-```
-
 ### `search_by_city`
 ```{r}
 search_by_city <- function(city){
@@ -126,6 +121,7 @@ search <- function(key_word){
 #dog
 ```
 
+## Count Breweries
 
 ```{r}
 type_count <- function(state_name){
