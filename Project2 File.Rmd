@@ -219,20 +219,46 @@ g + geom_point()
 g <- ggplot(data=food_test2_results, aes(x=fat, y=carbs))
 g + geom_point()
 
-#Create new variable, a carb/calories ratio
+#Create new variables, a carb/calories ratio and a macro-nutrient variable
 food_test2_results$protein <- extract_numeric(food_test2_results$protein)
 food_test2_results$carbs <- extract_numeric(food_test2_results$carbs)
 food_test2_results$fat <- extract_numeric(food_test2_results$fat)
-food_test2_results <- food_test2_results %>% mutate("ratio" = carbs/calories)
+food_test2_results <- food_test2_results %>% mutate("ratio" = carbs/calories, "macros"= carbs + calories + protein)
 
 #Cuisine search
 food_test3 <- GET("https://api.spoonacular.com/recipes/complexSearch?query=pasta&cuisine=italian&number=2&apiKey=c93de7d29d41461eac0f5e8272839b6e")
 parsed_food_test3 <- fromJSON(rawToChar(food_test3$content))
+food_test3_results <- parsed_food_test3$results
 
 #Taking IDs found before, get some more info. My goal right now is to get a combination of numeric and categorical variables
 combo_search <- paste0("https://api.spoonacular.com/recipes/", food_test2_results$id[2], "/information?includeNutrition=false&apiKey=c93de7d29d41461eac0f5e8272839b6e")
 food_test4 <- GET(combo_search)
 parsed_food_test4 <- fromJSON(rawToChar(food_test4$content))
+food_test4_results <- c(parsed_food_test4$weightWatcherSmartPoints, parsed_food_test4$healthScore, parsed_food_test4$pricePerServing, parsed_food_test4$id, parsed_food_test4$title, parsed_food_test4$readyInMinutes)
+
+#Try something similar, but with bulk. Can use this to get nutrition info, but the parsing might be hard.
+#Get list of IDs from a previous search
+id_list <- paste(as.character(food_test2_results$id[1:10]), collapse=",")
+bulk_search <- paste0("https://api.spoonacular.com/recipes/informationBulk?ids=", id_list, "&includeNutrition=false&apiKey=c93de7d29d41461eac0f5e8272839b6e")
+food_test5 <- GET(bulk_search)
+parsed_food_test5 <- fromJSON(rawToChar(food_test5$content))
+str(parsed_food_test5, levels=1)
+food_test5_results <- as_tibble(parsed_food_test5) %>% select(id, title, glutenFree, dairyFree, vegetarian, aggregateLikes, healthScore, weightWatcherSmartPoints, sourceName, pricePerServing, readyInMinutes)
+
+#My general thought is to use a nutrition or ingredient search to get a list of IDs to use for the rest of the searching and analysis. We can pull Weight Watchers points, price per serving, ready in minutes, health score, price per serving, ready in minutes, and aggregate likes as quantitative data. Potential options for some categorical stuff are vegetarian, gluten free, dairy free, source name. Can use cuisines, dish types, diets possibly, but those may be hard to parse.
+
+#Can use the categorical data of gluten free, vegetarian, and dairy free for contingency tables
+#Can look at whether anything seems to correlate with aggregate likes: health score, price per serving, ready in minutes, calories.
+#Can create box plot based on whatever numeric thing we want, break out into vegetarian and not, gluten free and not, dairy free and not.
+#Break into categories and get summary statistics. Average health score for vegetarian, average fat for gluten free, etc.
+#Create categorical variable for ready in minutes. 0-15: quick, >15-45: average, >45: long
+#Create categorical WW Points: 0-10=low, >10-20=medium, >20=high
+
+#Achieve minimum plot requirements: (1) Scatterplot of something vs aggregate likes, (2)box plots of health scores by vegetarian and not, (3) bar plot of categorized ready minutes or WW Points and pick a variable to group by like gluten free, (4) histogram of health score or calories
+
+
+
+
 
 
 ```
