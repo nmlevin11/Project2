@@ -192,7 +192,7 @@ Running into issues with no numeric data. I'll switch gears to food for a bit.
 #My API key c93de7d29d41461eac0f5e8272839b6e 
 
 #Query for banana with 20 results
-food_test <- GET("https://api.spoonacular.com/recipes/findByIngredients?ingredients=banana&findByNutrients?minCarbs=10&maxCarbs=50&apiKey=c93de7d29d41461eac0f5e8272839b6e")
+food_test <- GET("https://api.spoonacular.com/recipes/findByIngredients?ingredients=banana&apiKey=c93de7d29d41461eac0f5e8272839b6e")
 parsed_food_test <- fromJSON(rawToChar(food_test$content))
 
 #Grab what I care about
@@ -244,7 +244,10 @@ food_test5 <- GET(bulk_search)
 parsed_food_test5 <- fromJSON(rawToChar(food_test5$content))
 str(parsed_food_test5, levels=1)
 food_test5_results <- as_tibble(parsed_food_test5) %>% select(id, title, glutenFree, dairyFree, vegetarian, aggregateLikes, healthScore, weightWatcherSmartPoints, sourceName, pricePerServing, readyInMinutes)
-
+combined_results <- as_tibble(c(food_test5_results, food_test2_results[1:10,3:8]))
+combined_results <- combined_results %>% mutate(WW_category = if_else(weightWatcherSmartPoints <10, 1, if_else(weightWatcherSmartPoints <20, 2, 3))) 
+factor(combined_results$WW_category, levels = c(1, 2, 3), labels = c("low", "medium", "high"))
+combined_results <- combined_results %>% mutate(time_category = if_else(readyInMinutes <= 15, "quick", if_else(readyInMinutes <= 45, "medium", "long")))
 #My general thought is to use a nutrition or ingredient search to get a list of IDs to use for the rest of the searching and analysis. We can pull Weight Watchers points, price per serving, ready in minutes, health score, price per serving, ready in minutes, and aggregate likes as quantitative data. Potential options for some categorical stuff are vegetarian, gluten free, dairy free, source name. Can use cuisines, dish types, diets possibly, but those may be hard to parse.
 
 #Can use the categorical data of gluten free, vegetarian, and dairy free for contingency tables
@@ -254,12 +257,71 @@ food_test5_results <- as_tibble(parsed_food_test5) %>% select(id, title, glutenF
 #Create categorical variable for ready in minutes. 0-15: quick, >15-45: average, >45: long
 #Create categorical WW Points: 0-10=low, >10-20=medium, >20=high
 
-#Achieve minimum plot requirements: (1) Scatterplot of something vs aggregate likes, (2)box plots of health scores by vegetarian and not, (3) bar plot of categorized ready minutes or WW Points and pick a variable to group by like gluten free, (4) histogram of health score or calories
+#One set of options to achieve minimum plot requirements: (1) Scatterplot of something vs aggregate likes or something vs health score, (2)box plots of health scores by vegetarian and not, (3) bar plot of categorized ready minutes or WW Points and pick a variable to group by like gluten free, (4) histogram of health score or calories, plus a 5th of some type.
+
+#Plots for example. First, some scatterplot options.
+g <- ggplot(combined_results, aes(x=calories, y=healthScore))
+g + geom_point()
+
+g <- ggplot(combined_results, aes(x=calories, y=aggregateLikes))
+g + geom_point()
+
+#Next box plot of calories broken out by vegetarian and not
+g <- ggplot(combined_results, aes(x=vegetarian, y=calories))
+g + geom_boxplot()
+
+#Next a bar plot.
+g <- ggplot(combined_results, aes(x=WW_category))
+g + geom_bar(aes(fill=vegetarian), position="dodge")
+
+#Next a histogram
+g <- ggplot(combined_results, aes(x=calories))
+g + geom_histogram()
+
+#Try a search with a bunch of options to see if it works.
+new_test2 <- GET("https://api.spoonacular.com/recipes/findByIngredients?ingredients=banana&findByNutrients?minCalories=500&maxCalories=1500&apiKey=c93de7d29d41461eac0f5e8272839b6e")
+
+parsed_new_test2 <- fromJSON(rawToChar(new_test2$content))
+new_test_results2 <- as_tibble(parsed_new_test2) %>% select(id, title)
+
+
+```
+
+Now I want to create functions to do stuff
+```{r}
+#User options for search. Can input: (1)ingredient for search, (2)Minimum calories, (3)Maximum calories, (4)random=FALSE, (5)skip, (6)Number of results.
+
+ingredient_search <- function(ingredient, number=10){
+  ingredient <- tolower(ingredient)
+  search_url <- paste0("https://api.spoonacular.com/recipes/findByIngredients?ingredients=", ingredient,"&number=", number, "&apiKey=c93de7d29d41461eac0f5e8272839b6e")
+  search_result <- GET(search_url)
+  parsed_search_result <- fromJSON(rawToChar(search_result$content))
+  id_list <- paste(as.character(parsed_search_result$id), collapse=",")
+}
+
+#Run a test
+ingredient_test <- ingredient_search("apple", 5)
+
+calorie_search <- function(min_calories=0, max_calories=5000, random=FALSE, number=10){
+  if(random==FALSE){
+    search_url <- paste0("https://api.spoonacular.com/recipes/findByNutrients?minCalories=",min_calories,"&maxCalories=",max_calories,"&number=", number, "&apiKey=c93de7d29d41461eac0f5e8272839b6e")}
+  else {search_url <- paste0("https://api.spoonacular.com/recipes/findByNutrients?minCalories=",min_calories,"&maxCalories=",max_calories,"&number=", number, "&random=true&apiKey=c93de7d29d41461eac0f5e8272839b6e")}
+  search_result <- GET(search_url)
+  parsed_search_result <- fromJSON(rawToChar(search_result$content))
+  id_list <- paste(as.character(parsed_search_result$id), collapse=",")
+}
+
+#Now for either result, we'll do the searching to pull in additional info
+bulk_url <- paste0("https://api.spoonacular.com/recipes/informationBulk?ids=", id_list, "&includeNutrition=false&apiKey=c93de7d29d41461eac0f5e8272839b6e")
+bulk_search <- GET(bulk_url)
+parsed_bulk_search <- fromJSON(rawToChar(bulk_search$content))
+results_df <- as_tibble(parsed_bulk_search) %>% select(id, title, glutenFree, dairyFree, vegetarian, aggregateLikes, healthScore, weightWatcherSmartPoints, sourceName, pricePerServing, readyInMinutes)
+results_df <- results_df %>% mutate(WW_category = if_else(weightWatcherSmartPoints <10, 1, if_else(weightWatcherSmartPoints <20, 2, 3))) 
+factor(combined_results$WW_category, levels = c(1, 2, 3), labels = c("low", "medium", "high"))
 
 
 
 
-
-
+  
 ```
 
