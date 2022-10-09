@@ -54,7 +54,6 @@ search_by_country <- function(country){
 #united_states
 ```
 
-
 ### `search_by_state`
 ```{r}
 search_by_state <- function(state){
