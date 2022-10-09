@@ -10,184 +10,20 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 Start playing around with functions and queries.
 ```{r}
+#Maybe this code goes here?
+#rmarkdown::render("Proect2 File.Rmd", 
+                  #output_format = "github_document", 
+                  #output_file = "README.md")
+
+#Load libraries
 library(httr)
 library(dplyr)
 library(jsonlite)
 library(tidyverse)
-my_beer <- GET("https://api.openbrewerydb.org/breweries?by_name=cooper")
-str(my_beer, max.level=1)
-parsed <- fromJSON(rawToChar(my_beer$content))
-str(parsed, max.level=1)
-summary_info <- as_tibble(parsed %>% select(id, name, state))
 
-# Allow user to select a word in name and optional argument of number of results
-name_search <- function(name, num_results=NA){
-  name <- tolower(name)
-  if (is.numeric(num_results)){
-    search_num <- paste0("&per_page=", num_results)
-   search_url <- paste0("https://api.openbrewerydb.org/breweries?by_name=", name, search_num)
-  }
-  else { 
-    search_url <- paste0("https://api.openbrewerydb.org/breweries?by_name=", name)
-  }
-  search_run <- GET(search_url)
-}
-
-#Run a test case
-test_case <- name_search(name="city")
-parsed <- fromJSON(rawToChar(test_case$content))
-str(parsed, max.level=1)
-summary_info_test <- as_tibble(parsed %>% select(id, name, state, city, brewery_type))
-
-#Function to search by type with an option for number of results
-type_search <- function(type, num_results=NA){
-  type <- tolower(type)
-  if (is.numeric(num_results)){
-    search_num <- paste0("&per_page=", num_results)
-   search_url <- paste0("https://api.openbrewerydb.org/breweries?by_type=", type, search_num)
-  }
-  else { 
-    search_url <- paste0("https://api.openbrewerydb.org/breweries?by_type=", type)
-  }
-  search_run <- GET(search_url)
-}
-
-test_case2 <- type_search(type="Regional", 4)
-parsed2 <- fromJSON(rawToChar(test_case2$content))
-str(parsed2, max.level=1)
-summary_info_test2 <- as_tibble(parsed2 %>% select(id, name, state, city, brewery_type))
-
-#Function to convert state abbreviations to full state names. Finish out with all of the states if this is a functionality we want to have.
-state_conversion <- function(state){
-  ifelse(state = "AL", state_name = "Alabama", ifelse(state = "AK", state_name = "Alaska",   ifelse(state="AZ", state_name = "Arizona", ifelse(state= "AK", state_name = "Arkansas", state_name=state))))
-}
-  
-state_search <- function(state_name, num_results=NA){
-  state_name <- tolower(state_name)
-  state_name <- sub(" ", "_", state_name)
-  if (is.numeric(num_results)){
-    search_num <- paste0("&per_page=", num_results)
-   search_url <- paste0("https://api.openbrewerydb.org/breweries?by_state=", state_name, search_num)
-  }
-  else { 
-    search_url <- paste0("https://api.openbrewerydb.org/breweries?by_state=", state_name)
-  }
-  search_run <- GET(search_url)
-}
-
-#Test it out
-test_case3 <- state_search(state_name = "New York", 10)
-parsed3 <- fromJSON(rawToChar(test_case3$content))
-str(parsed3, max.level=1)
-summary_info_test3 <- as_tibble(parsed3 %>% select(id, name, state, city, brewery_type))
-
-#Goal of the next section is to create of function that takes a state, runs queries for all of the brewery types with the plan of plotting a barchart of the results. This gets long because of the maximum of 50 results per search.
-
-type_count <- function(state_name){
-  state_name <- tolower(state_name)
-  state_name <- sub(" ", "_", state_name)
-  
-  #Get number of micro breweries
-  search_url_micro <- paste0("https://api.openbrewerydb.org/breweries?by_state=", state_name, "&by_type=micro&per_page=50")
-  search_run_micro <- GET(search_url_micro)
-  parsed_micro <- fromJSON(rawToChar(search_run_micro$content))
-  total_micro <- nrow(parsed_micro)
-  if(total_micro==50){search_url_micro2 <- paste0("https://api.openbrewerydb.org/breweries?by_state=", state_name, "&by_type=micro&page=2&per_page=50")
-  search_run_micro2 <- GET(search_url_micro2)
-  parsed_micro2 <- fromJSON(rawToChar(search_run_micro2$content))
-  total_micro <- nrow(parsed_micro2) + total_micro}
-  if(total_micro==100){search_url_micro3 <- paste0("https://api.openbrewerydb.org/breweries?by_state=", state_name, "&by_type=micro&page=3&per_page=50")
-  search_run_micro3 <- GET(search_url_micro3)
-  parsed_micro3 <- fromJSON(rawToChar(search_run_micro3$content))
-  total_micro <- nrow(parsed_micro3) + total_micro}
-  if(total_micro==150){search_url_micro4 <- paste0("https://api.openbrewerydb.org/breweries?by_state=", state_name, "&by_type=micro&page=4&per_page=50")
-  search_run_micro4 <- GET(search_url_micro4)
-  parsed_micro4 <- fromJSON(rawToChar(search_run_micro4$content))
-  total_micro <- nrow(parsed_micro4) + total_micro}
-  #may need to  use if logic or a while loop to get all results for micro
-  search_url_nano <- paste0("https://api.openbrewerydb.org/breweries?by_state=", state_name, "&by_type=nano&per_page=50")
-  if(total_micro==200){search_url_micro5 <- paste0("https://api.openbrewerydb.org/breweries?by_state=", state_name, "&by_type=micro&page=5&per_page=50")
-  search_run_micro5 <- GET(search_url_micro5)
-  parsed_micro5 <- fromJSON(rawToChar(search_run_micro5$content))
-  total_micro <- nrow(parsed_micro5) + total_micro}
-  search_run_nano <- GET(search_url_nano)
-  parsed_nano <- fromJSON(rawToChar(search_run_nano$content))
-  total_nano <- nrow(parsed_nano)
-  if(total_micro==250){search_url_micro6 <- paste0("https://api.openbrewerydb.org/breweries?by_state=", state_name, "&by_type=micro&page=6&per_page=50")
-  search_run_micro6 <- GET(search_url_micro6)
-  parsed_micro6 <- fromJSON(rawToChar(search_run_micro6$content))
-  total_micro <- nrow(parsed_micro6) + total_micro}
-  if(total_micro==300){search_url_micro7 <- paste0("https://api.openbrewerydb.org/breweries?by_state=", state_name, "&by_type=micro&page=7&per_page=50")
-  search_run_micro7 <- GET(search_url_micro7)
-  parsed_micro7 <- fromJSON(rawToChar(search_run_micro7$content))
-  total_micro <- nrow(parsed_micro7) + total_micro}
-  if(total_micro==350){search_url_micro8 <- paste0("https://api.openbrewerydb.org/breweries?by_state=", state_name, "&by_type=micro&page=8&per_page=50")
-  search_run_micro8 <- GET(search_url_micro8)
-  parsed_micro8 <- fromJSON(rawToChar(search_run_micro8$content))
-  total_micro <- nrow(parsed_micro8) + total_micro}
-  if(total_micro==400){search_url_micro9 <- paste0("https://api.openbrewerydb.org/breweries?by_state=", state_name, "&by_type=micro&page=9&per_page=50")
-  search_run_micro9 <- GET(search_url_micro9)
-  parsed_micro9 <- fromJSON(rawToChar(search_run_micro9$content))
-  total_micro <- nrow(parsed_micro9) + total_micro}
-  if(total_micro==450){search_url_micro10 <- paste0("https://api.openbrewerydb.org/breweries?by_state=", state_name, "&by_type=micro&page=10&per_page=50")
-  search_run_micro10 <- GET(search_url_micro10)
-  parsed_micro10 <- fromJSON(rawToChar(search_run_micro10$content))
-  total_micro <- nrow(parsed_micro10) + total_micro}
-  
-  #Get number of nano breweries
-  search_url_nano <- paste0("https://api.openbrewerydb.org/breweries?by_state=", state_name, "&by_type=nano&per_page=50")
-  search_run_nano <- GET(search_url_nano)
-  parsed_nano <- fromJSON(rawToChar(search_run_nano$content))
-  total_nano <- nrow(parsed_nano)
-  
-  #Get number of regional breweries
-  search_url_regional <- paste0("https://api.openbrewerydb.org/breweries?by_state=", state_name, "&by_type=regional&per_page=50")
-  search_run_regional <- GET(search_url_regional)
-  parsed_regional <- fromJSON(rawToChar(search_run_regional$content))
-  total_regional <- nrow(parsed_regional)
-  
-  #Get number of brew pubs
-   search_url_brewpub <- paste0("https://api.openbrewerydb.org/breweries?by_state=", state_name, "&by_type=brewpub&per_page=50")
-  search_run_brewpub <- GET(search_url_brewpub)
-  parsed_brewpub <- fromJSON(rawToChar(search_run_brewpub$content))
-  total_brewpub <- nrow(parsed_brewpub)
-  search_url_brewpub2 <- paste0("https://api.openbrewerydb.org/breweries?by_state=", state_name, "&by_type=brewpub&page=2&per_page=50")
-  search_run_brewpub2 <- GET(search_url_brewpub2)
-  parsed_brewpub2 <- fromJSON(rawToChar(search_run_brewpub2$content))
-  total_brewpub <- nrow(parsed_brewpub2) + total_brewpub
-  search_url_brewpub3 <- paste0("https://api.openbrewerydb.org/breweries?by_state=", state_name, "&by_type=brewpub&page=3&per_page=50")
-  search_run_brewpub3 <- GET(search_url_brewpub3)
-  parsed_brewpub3 <- fromJSON(rawToChar(search_run_brewpub3$content))
-  total_brewpub <- nrow(parsed_brewpub3) + total_brewpub
-  search_url_brewpub4 <- paste0("https://api.openbrewerydb.org/breweries?by_state=", state_name, "&by_type=brewpub&page=4&per_page=50")
-  search_run_brewpub4 <- GET(search_url_brewpub4)
-  parsed_brewpub4 <- fromJSON(rawToChar(search_run_brewpub4$content))
-  total_brewpub <- nrow(parsed_brewpub4) + total_brewpub
-  search_url_brewpub5 <- paste0("https://api.openbrewerydb.org/breweries?by_state=", state_name, "&by_type=brewpub&page=5&per_page=50")
-  search_run_brewpub5 <- GET(search_url_brewpub5)
-  parsed_brewpub5 <- fromJSON(rawToChar(search_run_brewpub5$content))
-  total_brewpub <- nrow(parsed_brewpub5) + total_brewpub
-  
-  #Get number of large breweries
-  search_url_large <- paste0("https://api.openbrewerydb.org/breweries?by_state=", state_name, "&by_type=large&per_page=50")
-  search_run_large <- GET(search_url_large)
-  parsed_large <- fromJSON(rawToChar(search_run_large$content))
-  total_large <- nrow(parsed_large)
-  return(list(micro=total_micro, nano=total_nano, regional=total_regional, brewpub=total_brewpub, large=total_large))
-}
-
-test_case4 <- type_count("california")
-
-
-
-
-#Just a test search to throw different options in
-test <- GET("https://api.openbrewerydb.org/breweries?by_state=california&by_type=brewpub&page=5&per_page=50") 
-parsed_test <- fromJSON(rawToChar(test$content))
-summary_info_test <- as_tibble(parsed_test %>% select(id, name, state, city, brewery_type))
 ```
 
-Running into issues with no numeric data. I'll switch gears to food for a bit.
+Running some tests of how things work. This section won't go in our final file
 ```{r}
 #My API key c93de7d29d41461eac0f5e8272839b6e 
 
@@ -287,21 +123,28 @@ new_test_results2 <- as_tibble(parsed_new_test2) %>% select(id, title)
 
 ```
 
-Now I want to create functions to do stuff
+Now I want to create functions to run searches with some different options and get the data we want.
 ```{r}
-#User options for search. Can input: (1)ingredient for search, (2)Minimum calories, (3)Maximum calories, (4)random=FALSE, (5)skip, (6)Number of results.
-
-ingredient_search <- function(ingredient, number=10){
+#User options for search. Can input: (1)ingredient for search, (2)Number of results
+ingredient_search <- function(ingredient, number=8){
   ingredient <- tolower(ingredient)
   search_url <- paste0("https://api.spoonacular.com/recipes/findByIngredients?ingredients=", ingredient,"&number=", number, "&apiKey=c93de7d29d41461eac0f5e8272839b6e")
   search_result <- GET(search_url)
   parsed_search_result <- fromJSON(rawToChar(search_result$content))
   id_list <- paste(as.character(parsed_search_result$id), collapse=",")
+  bulk_url <- paste0("https://api.spoonacular.com/recipes/informationBulk?ids=", id_list, "&includeNutrition=false&apiKey=c93de7d29d41461eac0f5e8272839b6e")
+  bulk_search <- GET(bulk_url)
+  parsed_bulk_search <- fromJSON(rawToChar(bulk_search$content))
+  results_df <- as_tibble(parsed_bulk_search) %>% select(id, title, glutenFree, dairyFree, vegetarian, aggregateLikes, healthScore, weightWatcherSmartPoints, sourceName, pricePerServing, readyInMinutes)
+  combined_results <- results_df %>% mutate(WW_category = if_else(weightWatcherSmartPoints <10, 1, if_else(weightWatcherSmartPoints <20, 2, 3))) 
+  factor(combined_results$WW_category, levels = c(1, 2, 3), labels = c("low", "medium", "high"))
+return(combined_results)
 }
 
 #Run a test
-ingredient_test <- ingredient_search("apple", 5)
+ingredient_test <- ingredient_search("cherry", 32)
 
+#This function is a search by calories. User options are (1)Minimum calories, (2)Maximum calories, (3)Whether we want a random set of results or the first ones alphabetically, and a number of results. All of these have defaults, so the user can specify nothing and still get a result.
 calorie_search <- function(min_calories=0, max_calories=5000, random=FALSE, number=10){
   if(random==FALSE){
     search_url <- paste0("https://api.spoonacular.com/recipes/findByNutrients?minCalories=",min_calories,"&maxCalories=",max_calories,"&number=", number, "&apiKey=c93de7d29d41461eac0f5e8272839b6e")}
@@ -309,19 +152,61 @@ calorie_search <- function(min_calories=0, max_calories=5000, random=FALSE, numb
   search_result <- GET(search_url)
   parsed_search_result <- fromJSON(rawToChar(search_result$content))
   id_list <- paste(as.character(parsed_search_result$id), collapse=",")
+  
+  bulk_url <- paste0("https://api.spoonacular.com/recipes/informationBulk?ids=", id_list, "&includeNutrition=false&apiKey=c93de7d29d41461eac0f5e8272839b6e")
+  bulk_search <- GET(bulk_url)
+  parsed_bulk_search <- fromJSON(rawToChar(bulk_search$content))
+  results_df <- as_tibble(parsed_bulk_search) %>% select(id, title, glutenFree, dairyFree, vegetarian, aggregateLikes, healthScore, weightWatcherSmartPoints, sourceName, pricePerServing, readyInMinutes)
+  results_df <- results_df %>% mutate(WW_category = if_else(weightWatcherSmartPoints <10, 1, if_else(weightWatcherSmartPoints <20, 2, 3))) 
+  factor(combined_results$WW_category, levels = c(1, 2, 3), labels = c("low", "medium", "high"))
+  combined_results <- as_tibble(c(results_df, parsed_search_result[,3:8]))
+  return(combined_results)
 }
 
-#Now for either result, we'll do the searching to pull in additional info
-bulk_url <- paste0("https://api.spoonacular.com/recipes/informationBulk?ids=", id_list, "&includeNutrition=false&apiKey=c93de7d29d41461eac0f5e8272839b6e")
-bulk_search <- GET(bulk_url)
-parsed_bulk_search <- fromJSON(rawToChar(bulk_search$content))
-results_df <- as_tibble(parsed_bulk_search) %>% select(id, title, glutenFree, dairyFree, vegetarian, aggregateLikes, healthScore, weightWatcherSmartPoints, sourceName, pricePerServing, readyInMinutes)
-results_df <- results_df %>% mutate(WW_category = if_else(weightWatcherSmartPoints <10, 1, if_else(weightWatcherSmartPoints <20, 2, 3))) 
-factor(combined_results$WW_category, levels = c(1, 2, 3), labels = c("low", "medium", "high"))
+calorie_test <- calorie_search(min_calories = 100, max_calories = 500, number=30)
+
+#Plot my test as a bar plot
+g <- ggplot(calorie_test, aes(x=WW_category))
+g + geom_bar(aes(fill=vegetarian), position="dodge")
+
+g <- ggplot(ingredient_test, aes(x=WW_category))
+g + geom_bar(aes(fill=vegetarian), position="dodge")
+
+#Some scatterplot options.
+g <- ggplot(calorie_test, aes(x=calories, y=healthScore))
+g + geom_point()
+
+g <- ggplot(ingredient_test, aes(x=weightWatcherSmartPoints, y=healthScore))
+g + geom_point()
+
+g <- ggplot(calorie_test, aes(x=calories, y=aggregateLikes))
+g + geom_point()
+
+g <- ggplot(ingredient_test, aes(x=healthScore, y=aggregateLikes))
+g + geom_point()
+
+#Next box plot of calories or health score broken out by vegetarian and not
+g <- ggplot(calorie_test, aes(x=vegetarian, y=calories))
+g + geom_boxplot()
+
+g <- ggplot(ingredient_test, aes(x=vegetarian, y=healthScore))
+g + geom_boxplot()
+
+#Next some histograms
+g <- ggplot(calorie_test, aes(x=calories))
+g + geom_histogram(bins=10, color = "black", fill = "blue",
+size = 2)
+
+g <- ggplot(ingredient_test, aes(x=healthScore))
+g + geom_histogram(bins=10, color = "black", fill = "blue",
+size = 2)
+
+#Create some contingency tables
+table(ingredient_test$WW_category)
+table(ingredient_test$WW_category, ingredient_test$vegetarian)
+table(calorie_test$glutenFree, calorie_test$dairyFree)
 
 
 
-
-  
 ```
 
