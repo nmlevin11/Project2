@@ -1,0 +1,280 @@
+---
+title: "Projec 2"
+author: "Shaoyu Wang"
+date: '2022-09-30'
+output: github_document
+---
+
+```{r}
+rmarkdown::render("project2.Rmd", 
+                  output_format = "github_document",
+                  output_file = "README.md",
+                  output_options = list(html_preview= FALSE,toc=TRUE,toc_depth=2,toc_float=TRUE))
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+# Goal
+
+Our goal with this project is to create a vignette about contacting the [Beer API](https://api.openbrewerydb.org/breweries) using functions we create to query, parse, and return well-structured data. we will then use your functions to obtain data from the API and do some exploratory data analysis. 
+
+
+# Load packages
+
+```{r}
+library(httr)
+library(dplyr)
+library(jsonlite)
+library(tidyverse)
+```
+
+```{r}
+outputAPI <- fromJSON("https://api.openbrewerydb.org/breweries")
+str(outputAPI)
+```
+
+# Functions to Interact With the API
+
+## List Breweries
+### `search_by_country`
+```{r}
+search_by_country <- function(country){
+  base<-"https://api.openbrewerydb.org/breweries?"
+  call1 <- paste(base,"by_country=",country,"&per_page=50",sep="")
+  by_country <- GET(call1)
+  by_country_text <- content(by_country, "text")
+  by_country_json <- fromJSON(by_country_text, flatten = TRUE)
+  by_country_tb <- as.tibble(by_country_json)
+  return(by_country_tb)
+}
+# test the function
+#united_states <- search_by_country("United States")
+#united_states
+```
+
+
+### `search_by_state`
+```{r}
+search_by_state <- function(state){
+  base<-"https://api.openbrewerydb.org/breweries?"
+  call2 <- paste(base,"by_state=",state,"&per_page=50",sep="")
+  by_state <- GET(call2)
+  by_state_text <- content(by_state, "text")
+  by_state_json <- fromJSON(by_state_text, flatten = TRUE)
+  by_state_tb <- as.tibble(by_state_json)
+  return(by_state_tb)
+}
+# test the function
+#California <- search_by_state("California")
+#California
+```
+
+
+```{r}
+
+```
+
+### `search_by_city`
+```{r}
+search_by_city <- function(city){
+  base<-"https://api.openbrewerydb.org/breweries?"
+  call3 <- paste(base,"by_city=",city,"&per_page=50",sep="")
+  by_city <- GET(call3)
+  by_city_text <- content(by_city, "text")
+  by_city_json <- fromJSON(by_city_text, flatten = TRUE)
+  by_city_tb <- as.tibble(by_city_json)
+  return(by_city_tb)
+}
+# test the function
+#Boise <- search_by_city("Boise")
+#Boise
+```
+
+### `search_by_type`
+```{r}
+search_by_type <- function(brewery_type){
+  base<-"https://api.openbrewerydb.org/breweries?"
+  call4 <- paste(base,"by_type=",brewery_type,"&per_page=50",sep="")
+  by_type <- GET(call4)
+  by_type_text <- content(by_type, "text")
+  by_type_json <- fromJSON(by_type_text, flatten = TRUE)
+  by_type_tb <- as.tibble(by_type_json)
+  return(by_type_tb)
+}
+# test the function
+#large <- search_by_type("large")
+#large
+```
+
+
+## Search Breweries
+### `search`
+```{r}
+search <- function(key_word){
+  base <- "https://api.openbrewerydb.org/breweries/search?"
+  call5 <- paste(base,"query=",key_word,sep="")
+  search_key_word <- GET(call5)
+  search_key_word_text <- content(search_key_word, "text")
+  search_key_word_json <- fromJSON(search_key_word_text, flatten = TRUE)
+  search_key_word_tb <- as.tibble(search_key_word_json)
+  return(search_key_word_tb)
+}
+# test the function
+#dog <- search("dog")
+#dog
+```
+
+
+```{r}
+type_count <- function(state_name){
+  state_name <- tolower(state_name)
+  state_name <- sub(" ", "_", state_name)
+#micro  
+  search_url_micro <- paste0("https://api.openbrewerydb.org/breweries?by_state=", state_name, "&by_type=micro&per_page=50")
+  search_run_micro <- GET(search_url_micro)
+  parsed_micro <- fromJSON(rawToChar(search_run_micro$content))
+  total_micro <- nrow(parsed_micro)
+  
+  if(total_micro==50){
+    search_url_micro2 <- paste0("https://api.openbrewerydb.org/breweries?by_state=", state_name, "&by_type=micro&page=2&per_page=50")
+    search_run_micro2 <- GET(search_url_micro2)
+    parsed_micro2 <- fromJSON(rawToChar(search_run_micro2$content))
+    total_micro <- nrow(parsed_micro2) + total_micro}
+  
+  if(total_micro==100){
+    search_url_micro3 <- paste0("https://api.openbrewerydb.org/breweries?by_state=", state_name, "&by_type=micro&page=3&per_page=50")
+    search_run_micro3 <- GET(search_url_micro3)
+    parsed_micro3 <- fromJSON(rawToChar(search_run_micro3$content))
+    total_micro <- nrow(parsed_micro3) + total_micro}
+  
+  if(total_micro==150){
+    search_url_micro4 <- paste0("https://api.openbrewerydb.org/breweries?by_state=", state_name, "&by_type=micro&page=4&per_page=50")
+    search_run_micro4 <- GET(search_url_micro4)
+    parsed_micro4 <- fromJSON(rawToChar(search_run_micro4$content))
+    total_micro <- nrow(parsed_micro4) + total_micro}
+  
+  if(total_micro==200){
+    search_url_micro5 <- paste0("https://api.openbrewerydb.org/breweries?by_state=", state_name, "&by_type=micro&page=5&per_page=50")
+    search_run_micro5 <- GET(search_url_micro5)
+    parsed_micro5 <- fromJSON(rawToChar(search_run_micro5$content))
+    total_micro <- nrow(parsed_micro5) + total_micro}
+  
+  if(total_micro==250){
+    search_url_micro6 <- paste0("https://api.openbrewerydb.org/breweries?by_state=", state_name, "&by_type=micro&page=6&per_page=50")
+    search_run_micro6 <- GET(search_url_micro6)
+    parsed_micro6 <- fromJSON(rawToChar(search_run_micro6$content))
+    total_micro <- nrow(parsed_micro6) + total_micro}
+  
+  if(total_micro==300){
+    search_url_micro7 <- paste0("https://api.openbrewerydb.org/breweries?by_state=", state_name, "&by_type=micro&page=7&per_page=50")
+    search_run_micro7 <- GET(search_url_micro7)
+    parsed_micro7 <- fromJSON(rawToChar(search_run_micro7$content))
+    total_micro <- nrow(parsed_micro7) + total_micro}
+  
+  if(total_micro==350){
+    search_url_micro8 <- paste0("https://api.openbrewerydb.org/breweries?by_state=", state_name, "&by_type=micro&page=8&per_page=50")
+    search_run_micro8 <- GET(search_url_micro8)
+    parsed_micro8 <- fromJSON(rawToChar(search_run_micro8$content))
+    total_micro <- nrow(parsed_micro8) + total_micro}
+  
+  if(total_micro==400){
+    search_url_micro9 <- paste0("https://api.openbrewerydb.org/breweries?by_state=", state_name, "&by_type=micro&page=9&per_page=50")
+    search_run_micro9 <- GET(search_url_micro9)
+    parsed_micro9 <- fromJSON(rawToChar(search_run_micro9$content))
+    total_micro <- nrow(parsed_micro9) + total_micro}
+  
+  if(total_micro==450){
+    search_url_micro10 <- paste0("https://api.openbrewerydb.org/breweries?by_state=", state_name, "&by_type=micro&page=10&per_page=50")
+    search_run_micro10 <- GET(search_url_micro10)
+    parsed_micro10 <- fromJSON(rawToChar(search_run_micro10$content))
+    total_micro <- nrow(parsed_micro10) + total_micro}
+
+#nano  
+  search_url_nano <- paste0("https://api.openbrewerydb.org/breweries?by_state=", state_name, "&by_type=nano&per_page=50")
+  search_run_nano <- GET(search_url_nano)
+  parsed_nano <- fromJSON(rawToChar(search_run_nano$content))
+  total_nano <- nrow(parsed_nano)
+
+#regional  
+  search_url_regional <- paste0("https://api.openbrewerydb.org/breweries?by_state=", state_name, "&by_type=regional&per_page=50")
+  search_run_regional <- GET(search_url_regional)
+  parsed_regional <- fromJSON(rawToChar(search_run_regional$content))
+  total_regional <- nrow(parsed_regional)
+
+#brewpub  
+  search_url_brewpub <- paste0("https://api.openbrewerydb.org/breweries?by_state=", state_name, "&by_type=brewpub&per_page=50")
+  search_run_brewpub <- GET(search_url_brewpub)
+  parsed_brewpub <- fromJSON(rawToChar(search_run_brewpub$content))
+  total_brewpub <- nrow(parsed_brewpub)
+  
+  if(total_brewpub==50){
+    search_url_brewpub2 <- paste0("https://api.openbrewerydb.org/breweries?by_state=", state_name, "&by_type=brewpub&page=2&per_page=50")
+    search_run_brewpub2 <- GET(search_url_brewpub2)
+    parsed_brewpub2 <- fromJSON(rawToChar(search_run_brewpub2$content))
+    total_brewpub <- nrow(parsed_brewpub2) + total_brewpub}
+  
+  if(total_brewpub==100){
+    search_url_brewpub3 <- paste0("https://api.openbrewerydb.org/breweries?by_state=", state_name, "&by_type=brewpub&page=3&per_page=50")
+    search_run_brewpub3 <- GET(search_url_brewpub3)
+    parsed_brewpub3 <- fromJSON(rawToChar(search_run_brewpub3$content))
+    total_brewpub <- nrow(parsed_brewpub3) + total_brewpub}
+  
+  if(total_brewpub==150){
+    search_url_brewpub4 <- paste0("https://api.openbrewerydb.org/breweries?by_state=", state_name, "&by_type=brewpub&page=4&per_page=50")
+    search_run_brewpub4 <- GET(search_url_brewpub4)
+    parsed_brewpub4 <- fromJSON(rawToChar(search_run_brewpub4$content))
+    total_brewpub <- nrow(parsed_brewpub4) + total_brewpub}
+  
+  if(total_brewpub==200){
+    search_url_brewpub5 <- paste0("https://api.openbrewerydb.org/breweries?by_state=", state_name, "&by_type=brewpub&page=5&per_page=50")
+    search_run_brewpub5 <- GET(search_url_brewpub5)
+    parsed_brewpub5 <- fromJSON(rawToChar(search_run_brewpub5$content))
+    total_brewpub <- nrow(parsed_brewpub5) + total_brewpub}
+
+#large  
+  search_url_large <- paste0("https://api.openbrewerydb.org/breweries?by_state=", state_name, "&by_type=large&per_page=50")
+  search_run_large <- GET(search_url_large)
+  parsed_large <- fromJSON(rawToChar(search_run_large$content))
+  total_large <- nrow(parsed_large)
+  
+  return(list(micro=total_micro, nano=total_nano, regional=total_regional, brewpub=total_brewpub, large=total_large))
+}
+```
+
+
+# Exploratory Data Analysis (EDA)
+
+```{r}
+CA_data <- search_by_state("California") %>% select("id","name","brewery_type","city","state")
+CA_data
+```
+
+
+```{r}
+CA_count <- type_count("California")
+CA_count
+```
+
+
+```{r}
+table(CA_data$city, CA_data$brewery_type)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
