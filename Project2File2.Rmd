@@ -2,16 +2,11 @@
 title: "Project2"
 author: "Nicole Levin"
 date: "2022-09-29"
-#output: github_document
+output: html_document
 ---
 
-#{r setup, include=FALSE}
-#knitr::opts_chunk$set(echo = TRUE)
-```
 Start playing around with functions and queries.
 ```{r}
-#Maybe this code goes here?
- 
 #Load libraries
 library(httr)
 library(dplyr)
