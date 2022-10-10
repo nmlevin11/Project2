@@ -11,10 +11,10 @@ knitr::opts_chunk$set(echo = TRUE)
 Start playing around with functions and queries.
 ```{r}
 #Maybe this code goes here?
-rmarkdown::render(input = "Project2File.Rmd", 
+rmarkdown::render(input = "Project2File2.Rmd", 
                   output_format = "github_document", 
                   output_file = "README.md")
-
+ 
 #Load libraries
 library(httr)
 library(dplyr)
