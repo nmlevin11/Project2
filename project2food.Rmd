@@ -158,7 +158,6 @@ table(cal_prot_data$fat_level)
 table(cal_prot_data$carbs_level)
 ```
 
-
 ```{r}
 table(cal_prot_data$fat_level, cal_prot_data$carbs_level)
 ```
