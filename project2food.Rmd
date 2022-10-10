@@ -143,14 +143,25 @@ cal_prot_data <- cal_prot_data %>%
 
 ```{r}
 g_fat_bar <- ggplot(cal_prot_data, aes(x = fat_level))
-g_fat_bar + geom_bar(aes(fill = fat_level), position = "dodge")+
+g_fat_bar + geom_bar(aes(fill = fat_level), position = "dodge") +
   labs()
 g_carbs_bar <- ggplot(cal_prot_data, aes(x = carbs_level))
-g_carbs_bar + geom_bar(aes(fill = carbs_level), position = "dodge")+
+g_carbs_bar + geom_bar(aes(fill = carbs_level), position = "dodge") +
   labs()
 ```
 
+```{r}
+table(cal_prot_data$fat_level)
+```
 
+```{r}
+table(cal_prot_data$carbs_level)
+```
+
+
+```{r}
+table(cal_prot_data$fat_level, cal_prot_data$carbs_level)
+```
 
 
 
