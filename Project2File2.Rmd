@@ -1,19 +1,16 @@
 ---
-title: "Project 2"
+title: "Project2"
 author: "Nicole Levin"
 date: "2022-09-29"
-output: github_document
+#output: github_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+#{r setup, include=FALSE}
+#knitr::opts_chunk$set(echo = TRUE)
 ```
 Start playing around with functions and queries.
 ```{r}
 #Maybe this code goes here?
-rmarkdown::render(input = "Project2File2.Rmd", 
-                  output_format = "github_document", 
-                  output_file = "README.md")
  
 #Load libraries
 library(httr)
