@@ -1,264 +1,213 @@
 Project 2
 ================
-Nicole Levin
-2022-09-29
-
-\#{r setup, include=FALSE} \#knitr::opts_chunk\$set(echo = TRUE)
-
-    Start playing around with functions and queries.
-
-    ```r
-    #Maybe this code goes here?
-     
-    #Load libraries
-    library(httr)
-    library(dplyr)
-    library(jsonlite)
-    library(tidyverse)
-
-Running some tests of how things work. This section won’t go in our
-final file
+Shaoyu Wang
+2022-10-09
 
 ``` r
-# #My API key c93de7d29d41461eac0f5e8272839b6e 
-# 
-# #Query for banana with 20 results
-# food_test <- GET("https://api.spoonacular.com/recipes/findByIngredients?ingredients=banana&apiKey=c93de7d29d41461eac0f5e8272839b6e")
-# parsed_food_test <- fromJSON(rawToChar(food_test$content))
-# 
-# #Grab what I care about
-# food_test_results <- as_tibble(parsed_food_test) %>% select(title)
-# 
-# #Query based on nutrition
-# food_test2 <- GET("https://api.spoonacular.com/recipes/findByNutrients?minCarbs=1&maxCarbs=50&number=20&apiKey=c93de7d29d41461eac0f5e8272839b6e")
-# parsed_food_test2 <- fromJSON(rawToChar(food_test2$content))
-# food_test2_results <- as_tibble(parsed_food_test2) %>% select(id, title, calories, protein, fat, carbs)
-# 
-# #Plot fat vs. calories
-# g <- ggplot(data=food_test2_results, aes(x=calories, y=fat))
-# g + geom_point()
-# 
-# #Plot carbs vs calories
-# g <- ggplot(data=food_test2_results, aes(x=calories, y=carbs))
-# g + geom_point()
-# 
-# #Plot protein vs calories
-# g <- ggplot(data=food_test2_results, aes(x=calories, y=protein))
-# g + geom_point()
-# 
-# #Plot carbs vs fat
-# g <- ggplot(data=food_test2_results, aes(x=fat, y=carbs))
-# g + geom_point()
-# 
-# #Create new variables, a carb/calories ratio and a macro-nutrient variable
-# food_test2_results$protein <- extract_numeric(food_test2_results$protein)
-# food_test2_results$carbs <- extract_numeric(food_test2_results$carbs)
-# food_test2_results$fat <- extract_numeric(food_test2_results$fat)
-# food_test2_results <- food_test2_results %>% mutate("ratio" = carbs/calories, "macros"= carbs + calories + protein)
-# 
-# #Cuisine search
-# food_test3 <- GET("https://api.spoonacular.com/recipes/complexSearch?query=pasta&cuisine=italian&number=2&apiKey=c93de7d29d41461eac0f5e8272839b6e")
-# parsed_food_test3 <- fromJSON(rawToChar(food_test3$content))
-# food_test3_results <- parsed_food_test3$results
-# 
-# #Taking IDs found before, get some more info. My goal right now is to get a combination of numeric and categorical variables
-# combo_search <- paste0("https://api.spoonacular.com/recipes/", food_test2_results$id[2], "/information?includeNutrition=false&apiKey=c93de7d29d41461eac0f5e8272839b6e")
-# food_test4 <- GET(combo_search)
-# parsed_food_test4 <- fromJSON(rawToChar(food_test4$content))
-# food_test4_results <- c(parsed_food_test4$weightWatcherSmartPoints, parsed_food_test4$healthScore, parsed_food_test4$pricePerServing, parsed_food_test4$id, parsed_food_test4$title, parsed_food_test4$readyInMinutes)
-# 
-# #Try something similar, but with bulk. Can use this to get nutrition info, but the parsing might be hard.
-# #Get list of IDs from a previous search
-# id_list <- paste(as.character(food_test2_results$id[1:10]), collapse=",")
-# bulk_search <- paste0("https://api.spoonacular.com/recipes/informationBulk?ids=", id_list, "&includeNutrition=false&apiKey=c93de7d29d41461eac0f5e8272839b6e")
-# food_test5 <- GET(bulk_search)
-# parsed_food_test5 <- fromJSON(rawToChar(food_test5$content))
-# str(parsed_food_test5, levels=1)
-# food_test5_results <- as_tibble(parsed_food_test5) %>% select(id, title, glutenFree, dairyFree, vegetarian, aggregateLikes, healthScore, weightWatcherSmartPoints, sourceName, pricePerServing, readyInMinutes)
-# combined_results <- as_tibble(c(food_test5_results, food_test2_results[1:10,3:8]))
-# combined_results <- combined_results %>% mutate(WW_category = if_else(weightWatcherSmartPoints <10, 1, if_else(weightWatcherSmartPoints <20, 2, 3))) 
-# factor(combined_results$WW_category, levels = c(1, 2, 3), labels = c("low", "medium", "high"))
-# combined_results <- combined_results %>% mutate(time_category = if_else(readyInMinutes <= 15, "quick", if_else(readyInMinutes <= 45, "medium", "long")))
-# #My general thought is to use a nutrition or ingredient search to get a list of IDs to use for the rest of the searching and analysis. We can pull Weight Watchers points, price per serving, ready in minutes, health score, price per serving, ready in minutes, and aggregate likes as quantitative data. Potential options for some categorical stuff are vegetarian, gluten free, dairy free, source name. Can use cuisines, dish types, diets possibly, but those may be hard to parse.
-# 
-# #Can use the categorical data of gluten free, vegetarian, and dairy free for contingency tables
-# #Can look at whether anything seems to correlate with aggregate likes: health score, price per serving, ready in minutes, calories.
-# #Can create box plot based on whatever numeric thing we want, break out into vegetarian and not, gluten free and not, dairy free and not.
-# #Break into categories and get summary statistics. Average health score for vegetarian, average fat for gluten free, etc.
-# #Create categorical variable for ready in minutes. 0-15: quick, >15-45: average, >45: long
-# #Create categorical WW Points: 0-10=low, >10-20=medium, >20=high
-# 
-# #One set of options to achieve minimum plot requirements: (1) Scatterplot of something vs aggregate likes or something vs health score, (2)box plots of health scores by vegetarian and not, (3) bar plot of categorized ready minutes or WW Points and pick a variable to group by like gluten free, (4) histogram of health score or calories, plus a 5th of some type.
-# 
-# #Plots for example. First, some scatterplot options.
-# g <- ggplot(combined_results, aes(x=calories, y=healthScore))
-# g + geom_point()
-# 
-# g <- ggplot(combined_results, aes(x=calories, y=aggregateLikes))
-# g + geom_point()
-# 
-# #Next box plot of calories broken out by vegetarian and not
-# g <- ggplot(combined_results, aes(x=vegetarian, y=calories))
-# g + geom_boxplot()
-# 
-# #Next a bar plot.
-# g <- ggplot(combined_results, aes(x=WW_category))
-# g + geom_bar(aes(fill=vegetarian), position="dodge")
-# 
-# #Next a histogram
-# g <- ggplot(combined_results, aes(x=calories))
-# g + geom_histogram()
-# 
-# #Try a search with a bunch of options to see if it works.
-# new_test2 <- GET("https://api.spoonacular.com/recipes/findByIngredients?ingredients=banana&findByNutrients?minCalories=500&maxCalories=1500&apiKey=c93de7d29d41461eac0f5e8272839b6e")
-# 
-# parsed_new_test2 <- fromJSON(rawToChar(new_test2$content))
-# new_test_results2 <- as_tibble(parsed_new_test2) %>% select(id, title)
+library(httr)
+library(dplyr)
+library(jsonlite)
+library(tidyverse)
 ```
 
-Now I want to create functions to run searches with some different
-options and get the data we want.
+``` r
+#My API key 90c7af330c5f45a4a1b709068daed452 
+
+myData <- GET("https://api.spoonacular.com/recipes/findByNutrients?minCarbs=10&maxCarbs=50&number=30&apiKey=90c7af330c5f45a4a1b709068daed452")
+parsed <- fromJSON(rawToChar(myData$content))
+parsed %>% colnames()
+```
+
+    ## [1] "id"        "title"     "image"     "imageType" "calories"  "protein"   "fat"       "carbs"
 
 ``` r
-#User options for search. Can input: (1)ingredient for search, (2)Number of results
-ingredient_search <- function(ingredient, number=8){
-  ingredient <- tolower(ingredient)
-  search_url <- paste0("https://api.spoonacular.com/recipes/findByIngredients?ingredients=", ingredient,"&number=", number, "&apiKey=c93de7d29d41461eac0f5e8272839b6e")
-  search_result <- GET(search_url)
-  parsed_search_result <- fromJSON(rawToChar(search_result$content))
-  id_list <- paste(as.character(parsed_search_result$id), collapse=",")
-  bulk_url <- paste0("https://api.spoonacular.com/recipes/informationBulk?ids=", id_list, "&includeNutrition=false&apiKey=c93de7d29d41461eac0f5e8272839b6e")
-  bulk_search <- GET(bulk_url)
-  parsed_bulk_search <- fromJSON(rawToChar(bulk_search$content))
-  results_df <- as_tibble(parsed_bulk_search) %>% select(id, title, glutenFree, dairyFree, vegetarian, aggregateLikes, healthScore, weightWatcherSmartPoints, sourceName, pricePerServing, readyInMinutes)
-  combined_results <- results_df %>% mutate(WW_category = if_else(weightWatcherSmartPoints <10, 1, if_else(weightWatcherSmartPoints <20, 2, 3))) 
-  factor(combined_results$WW_category, levels = c(1, 2, 3), labels = c("low", "medium", "high"))
-return(combined_results)
+# search function
+search_by_nutr <- function(nutrient, from, to, number){
+  base<-"https://api.spoonacular.com/recipes/findByNutrients"
+  call1 <- paste(base,"?","min",nutrient,"=",from,"&","max",nutrient,"=",to,"&number=",number,"&apiKey=90c7af330c5f45a4a1b709068daed452",sep="")
+  get_nutrients <- GET(call1)
+  get_nutrients_text <- content(get_nutrients, "text")
+  get_nutrients_json <- fromJSON(get_nutrients_text, flatten = TRUE)
+  get_nutrients_tb <- as_tibble(get_nutrients_json) %>%
+    select("id","title","calories","protein","fat","carbs")
+  return(get_nutrients_tb)
 }
+```
 
-#Run a test
-ingredient_test <- ingredient_search("cherry", 32)
+``` r
+# for a certain range calories, to compare protein/carbs/fat with calories, find which one the more related to calories.
+cal_data <- search_by_nutr(nutrient="Calories", from=1000, to=2500, number=100)
 
-#This function is a search by calories. User options are (1)Minimum calories, (2)Maximum calories, (3)Whether we want a random set of results or the first ones alphabetically, and a number of results. All of these have defaults, so the user can specify nothing and still get a result.
-calorie_search <- function(min_calories=0, max_calories=5000, random=FALSE, number=10){
-  if(random==FALSE){
-    search_url <- paste0("https://api.spoonacular.com/recipes/findByNutrients?minCalories=",min_calories,"&maxCalories=",max_calories,"&number=", number, "&apiKey=c93de7d29d41461eac0f5e8272839b6e")}
-  else {search_url <- paste0("https://api.spoonacular.com/recipes/findByNutrients?minCalories=",min_calories,"&maxCalories=",max_calories,"&number=", number, "&random=true&apiKey=c93de7d29d41461eac0f5e8272839b6e")}
-  search_result <- GET(search_url)
-  parsed_search_result <- fromJSON(rawToChar(search_result$content))
-  id_list <- paste(as.character(parsed_search_result$id), collapse=",")
-  
-  bulk_url <- paste0("https://api.spoonacular.com/recipes/informationBulk?ids=", id_list, "&includeNutrition=false&apiKey=c93de7d29d41461eac0f5e8272839b6e")
-  bulk_search <- GET(bulk_url)
-  parsed_bulk_search <- fromJSON(rawToChar(bulk_search$content))
-  results_df <- as_tibble(parsed_bulk_search) %>% select(id, title, glutenFree, dairyFree, vegetarian, aggregateLikes, healthScore, weightWatcherSmartPoints, sourceName, pricePerServing, readyInMinutes)
-  results_df <- results_df %>% mutate(WW_category = if_else(weightWatcherSmartPoints <10, 1, if_else(weightWatcherSmartPoints <20, 2, 3))) 
-  factor(combined_results$WW_category, levels = c(1, 2, 3), labels = c("low", "medium", "high"))
-  combined_results <- as_tibble(c(results_df, parsed_search_result[,3:8]))
-  return(combined_results)
+cal_data$protein <- as.numeric(substr(cal_data$protein,1, nchar(cal_data$protein)-1))
+cal_data$fat <- as.numeric(substr(cal_data$fat,1, nchar(cal_data$fat)-1))
+cal_data$carbs <- as.numeric(substr(cal_data$carbs,1, nchar(cal_data$carbs)-1))
+
+cal_data
+```
+
+    ## # A tibble: 48 × 6
+    ##        id title                                 calories protein   fat carbs
+    ##     <int> <chr>                                    <int>   <dbl> <dbl> <dbl>
+    ##  1  31237 Black Eyed Peas With Ham Hocks            1073      86    61    41
+    ##  2 157399 Crispy-Crowned Guacamole Fish Fillets     1026      77    57    63
+    ##  3 157426 Stuffed Shells with Beef and Broc         1192      56    72    81
+    ##  4 622825 Tortilla Burger Loco Vaca                 1159      54    86    42
+    ##  5 631814 $50,000 Burger                            1075      75    69    42
+    ##  6 631868 4 Ingredient Chicken Pot Pie              1053      89    35    90
+    ##  7 633538 Baked Chicken with Cinnamon Apples        1222      72    85    32
+    ##  8 633661 Baked Lasagne                             1215      65    64    97
+    ##  9 633754 Baked Ratatouille                         1028      32    69    82
+    ## 10 633841 Baked Teriyaki Chicken Drumsticks         1093      99    46    65
+    ## # … with 38 more rows
+
+``` r
+g_prot_scat <- ggplot(cal_data, aes(x = protein, y = calories))
+g_prot_scat + geom_point()
+```
+
+![](README_files/figure-gfm/unnamed-chunk-137-1.png)<!-- -->
+
+``` r
+g_fat_scat <- ggplot(cal_data, aes(x = fat, y = calories))
+g_fat_scat + geom_point()
+```
+
+![](README_files/figure-gfm/unnamed-chunk-137-2.png)<!-- -->
+
+``` r
+g_carb_scat <- ggplot(cal_data, aes(x = carbs, y = calories))
+g_carb_scat + geom_point()
+```
+
+![](README_files/figure-gfm/unnamed-chunk-137-3.png)<!-- -->
+
+``` r
+g_carb_box <- ggplot(cal_data, aes(x = calories, y = carbs))
+g_carb_box + geom_boxplot() +
+     geom_point(alpha = 1, size = 2, position = "jitter") +
+     labs()
+```
+
+![](README_files/figure-gfm/unnamed-chunk-138-1.png)<!-- -->
+
+``` r
+g_fat_box <- ggplot(cal_data, aes(x = calories, y = fat))
+g_fat_box + geom_boxplot() +
+     geom_point(alpha = 1, size = 2, position = "jitter") +
+     labs()
+```
+
+![](README_files/figure-gfm/unnamed-chunk-138-2.png)<!-- -->
+
+``` r
+g_prot_box <- ggplot(cal_data, aes(x = calories, y = protein))
+g_prot_box + geom_boxplot() +
+     geom_point(alpha = 1, size = 2, position = "jitter") +
+     labs()
+```
+
+![](README_files/figure-gfm/unnamed-chunk-138-3.png)<!-- -->
+
+``` r
+g_carb_hist <- ggplot(cal_data, aes(x = carbs)) 
+g_carb_hist + geom_histogram(color = "blue", fill = "lightblue", breaks=c(0,10,20,30,40,50,60,70,80,90,100), size = 1, binwidth = 2)
+```
+
+![](README_files/figure-gfm/unnamed-chunk-139-1.png)<!-- -->
+
+``` r
+g_fat_hist <- ggplot(cal_data, aes(x = fat)) 
+g_fat_hist + geom_histogram(color = "blue", fill = "lightblue", breaks=c(0,10,20,30,40,50,60,70,80,90,100), size = 1, binwidth = 2)
+```
+
+![](README_files/figure-gfm/unnamed-chunk-139-2.png)<!-- -->
+
+``` r
+g_prot_hist <- ggplot(cal_data, aes(x = protein)) 
+g_prot_hist + geom_histogram(color = "blue", fill = "lightblue", breaks=c(0,10,20,30,40,50,60,70,80,90,100), size = 1, binwidth = 2)
+```
+
+![](README_files/figure-gfm/unnamed-chunk-139-3.png)<!-- -->
+
+``` r
+search_by_2_nutrs <- function(first_nutrient, first_from, first_to, sec_nutrient, sec_from, sec_to, number){
+  base<-"https://api.spoonacular.com/recipes/findByNutrients"
+  call2 <- paste(base,"?min",first_nutrient,"=",first_from,"&max",first_nutrient,"=", first_to,
+                 "&min",sec_nutrient,"=",sec_from,"&max",sec_nutrient,"=", sec_to,
+                 "&number=",number,"&apiKey=90c7af330c5f45a4a1b709068daed452",sep="")
+  get_2_nutrs <- GET(call2)
+  get_2_nutrs_text <- content(get_2_nutrs, "text")
+  get_2_nutrs_json <- fromJSON(get_2_nutrs_text, flatten = TRUE)
+  get_2_nutrs_tb <- as_tibble(get_2_nutrs_json) %>%
+    select("id","title","calories","protein","fat","carbs")
+  return(get_2_nutrs_tb)
 }
-
-calorie_test <- calorie_search(min_calories = 100, max_calories = 500, number=30)
-
-#Plot my test as a bar plot
-g <- ggplot(calorie_test, aes(x=WW_category))
-g + geom_bar(aes(fill=vegetarian), position="dodge")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
-
 ``` r
-g <- ggplot(ingredient_test, aes(x=WW_category))
-g + geom_bar(aes(fill=vegetarian), position="dodge")
+# For people who like fitness, find a certain range calories but high protein
+cal_prot_data <- search_by_2_nutrs(first_nutrient="Calories", first_from=1000, first_to=2500,
+                                  sec_nutrient="Protein", sec_from=30, sec_to=100, number=100)
+
+cal_prot_data$protein <- as.numeric(substr(cal_prot_data$protein,1, nchar(cal_prot_data$protein)-1))
+cal_prot_data$fat <- as.numeric(substr(cal_prot_data$fat,1, nchar(cal_prot_data$fat)-1))
+cal_prot_data$carbs <- as.numeric(substr(cal_prot_data$carbs,1, nchar(cal_prot_data$carbs)-1))
+
+cal_prot_data <- cal_prot_data %>% 
+  mutate(fat_level = ifelse(cal_prot_data$fat >= 80, "3",
+                            ifelse(cal_prot_data$fat >= 50,"2",
+                                   ifelse(cal_prot_data$fat >= 0, "1"))),
+         carbs_level = ifelse(cal_prot_data$carbs >= 80, "3",
+                              ifelse(cal_prot_data$carbs >= 50, "2",
+                                     ifelse(cal_prot_data$carbs >= 0, "1"))))
+
+cal_prot_data <- cal_prot_data %>% 
+  mutate(fat_level = factor(fat_level,
+                            level = c(1,2,3),
+                            labels = c("low","medium","high")),
+         carbs_level = factor(carbs_level,
+                              level = c(1,2,3),
+                              labels = c("low","medium","high")))
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-4-2.png)<!-- -->
-
 ``` r
-#Some scatterplot options.
-g <- ggplot(calorie_test, aes(x=calories, y=healthScore))
-g + geom_point()
+g_fat_bar <- ggplot(cal_prot_data, aes(x = fat_level))
+g_fat_bar + geom_bar(aes(fill = fat_level), position = "dodge") +
+  labs()
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-4-3.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-142-1.png)<!-- -->
 
 ``` r
-g <- ggplot(ingredient_test, aes(x=weightWatcherSmartPoints, y=healthScore))
-g + geom_point()
+g_carbs_bar <- ggplot(cal_prot_data, aes(x = carbs_level))
+g_carbs_bar + geom_bar(aes(fill = carbs_level), position = "dodge") +
+  labs()
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-4-4.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-142-2.png)<!-- -->
 
 ``` r
-g <- ggplot(calorie_test, aes(x=calories, y=aggregateLikes))
-g + geom_point()
-```
-
-![](README_files/figure-gfm/unnamed-chunk-4-5.png)<!-- -->
-
-``` r
-g <- ggplot(ingredient_test, aes(x=healthScore, y=aggregateLikes))
-g + geom_point()
-```
-
-![](README_files/figure-gfm/unnamed-chunk-4-6.png)<!-- -->
-
-``` r
-#Next box plot of calories or health score broken out by vegetarian and not
-g <- ggplot(calorie_test, aes(x=vegetarian, y=calories))
-g + geom_boxplot()
-```
-
-![](README_files/figure-gfm/unnamed-chunk-4-7.png)<!-- -->
-
-``` r
-g <- ggplot(ingredient_test, aes(x=vegetarian, y=healthScore))
-g + geom_boxplot()
-```
-
-![](README_files/figure-gfm/unnamed-chunk-4-8.png)<!-- -->
-
-``` r
-#Next some histograms
-g <- ggplot(calorie_test, aes(x=calories))
-g + geom_histogram(bins=10, color = "black", fill = "blue",
-size = 2)
-```
-
-![](README_files/figure-gfm/unnamed-chunk-4-9.png)<!-- -->
-
-``` r
-g <- ggplot(ingredient_test, aes(x=healthScore))
-g + geom_histogram(bins=10, color = "black", fill = "blue",
-size = 2)
-```
-
-![](README_files/figure-gfm/unnamed-chunk-4-10.png)<!-- -->
-
-``` r
-#Create some contingency tables
-table(ingredient_test$WW_category)
+table(cal_prot_data$fat_level)
 ```
 
     ## 
-    ##  1  2  3 
-    ## 19 10  3
+    ##    low medium   high 
+    ##      2     23      9
 
 ``` r
-table(ingredient_test$WW_category, ingredient_test$vegetarian)
+table(cal_prot_data$carbs_level)
 ```
 
-    ##    
-    ##     FALSE TRUE
-    ##   1     6   13
-    ##   2     2    8
-    ##   3     1    2
+    ## 
+    ##    low medium   high 
+    ##     11     11     12
 
 ``` r
-table(calorie_test$glutenFree, calorie_test$dairyFree)
+table(cal_prot_data$fat_level, cal_prot_data$carbs_level)
 ```
 
-    ##        
-    ##         FALSE TRUE
-    ##   FALSE    12    3
-    ##   TRUE      8    7
+    ##         
+    ##          low medium high
+    ##   low      0      1    1
+    ##   medium   6      6   11
+    ##   high     5      4    0
