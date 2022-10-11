@@ -3,15 +3,6 @@ Project 2
 Nicole Levin, Shaoyu Wang
 2022-10-11
 
-- <a href="#introduction" id="toc-introduction">Introduction</a>
-- <a href="#required-packages" id="toc-required-packages">Required
-  Packages</a>
-- <a href="#building-search-functions"
-  id="toc-building-search-functions">Building Search Functions</a>
-- <a href="#exploratory-data-analysis"
-  id="toc-exploratory-data-analysis">Exploratory Data Analysis</a>
-- <a href="#conclusion" id="toc-conclusion">Conclusion</a>
-
 # Introduction
 
 This document is a vignette that describes pulling data from an API and
@@ -25,7 +16,7 @@ results.
 # Required Packages
 
 The following packages are required for interacting with the functions
-in this vignette: \* httr \* dplyr \* jsonlite \* tidyverse
+in this vignette: - httr - dplyr - jsonlite - tidyverse
 
 First, we will load the required packages
 
@@ -52,9 +43,7 @@ specified ingredient. The unique recipe ID numbers that the API uses for
 identifying these recipes are then plugged into a second search to get a
 combination of quantitative and categorical data including health
 scores, aggregate likes, whether a dish is vegetarian, whether it is
-gluten free, and a few others. The function takes two arguments, which
-are: 1. `ingredient` - name of the ingredient 2. `number` - maximum
-number of results to return Full search code is as follows:
+gluten free, and a few others. Full search code is as follows:
 
 ``` r
 #User options for search. Can input: (1)ingredient for search, (2)Number of results
@@ -82,20 +71,21 @@ ingredient_test
 ```
 
     ## # A tibble: 50 × 12
-    ##         id title         glutenFree dairyFree vegetarian aggregateLikes healthScore weightWatcherSm…
-    ##      <int> <chr>         <lgl>      <lgl>     <lgl>               <int>       <int>            <int>
-    ##  1  799316 Black Cherry… TRUE       TRUE      FALSE                  10           0                6
-    ##  2   50161 Jell-o Mold   TRUE       FALSE     TRUE                    1           2                9
-    ##  3  779475 Black Cherry… TRUE       TRUE      TRUE                  167           0                2
-    ##  4   50105 Cherry Mojit… TRUE       TRUE      TRUE                   37           1                5
-    ##  5   52755 Yellow Cherr… TRUE       TRUE      TRUE                   26           2               31
-    ##  6 1065961 Cherry Prese… TRUE       TRUE      TRUE                    1           7               11
-    ##  7  405122 Bing Cherry … TRUE       FALSE     TRUE                    0           2                6
-    ##  8  525223 Dark Chocola… FALSE      TRUE      FALSE               26141           3               30
-    ##  9  524954 Root Beer Fl… TRUE       TRUE      FALSE                2592           1                2
-    ## 10  539027 Quick and Ea… TRUE       FALSE     TRUE                 1491           5               10
-    ## # … with 40 more rows, and 4 more variables: sourceName <chr>, pricePerServing <dbl>,
-    ## #   readyInMinutes <int>, WW_category <dbl>
+    ##         id title      glutenFree dairyFree vegetarian aggregateLikes healthScore
+    ##      <int> <chr>      <lgl>      <lgl>     <lgl>               <int>       <int>
+    ##  1  799316 Black Che… TRUE       TRUE      FALSE                  10           0
+    ##  2   50161 Jell-o Mo… TRUE       FALSE     TRUE                    1           2
+    ##  3  779475 Black Che… TRUE       TRUE      TRUE                  167           0
+    ##  4   50105 Cherry Mo… TRUE       TRUE      TRUE                   37           1
+    ##  5   52755 Yellow Ch… TRUE       TRUE      TRUE                   26           2
+    ##  6 1065961 Cherry Pr… TRUE       TRUE      TRUE                    1           7
+    ##  7  405122 Bing Cher… TRUE       FALSE     TRUE                    0           2
+    ##  8  525223 Dark Choc… FALSE      TRUE      FALSE               26141           3
+    ##  9  524954 Root Beer… TRUE       TRUE      FALSE                2592           1
+    ## 10  539027 Quick and… TRUE       FALSE     TRUE                 1491           5
+    ## # … with 40 more rows, and 5 more variables: weightWatcherSmartPoints <int>,
+    ## #   sourceName <chr>, pricePerServing <dbl>, readyInMinutes <int>,
+    ## #   WW_category <dbl>
 
 The example search results are for the ingredient “cherry with a maximum
 number of results of 30. As the output shows, we can get a lot of
@@ -103,29 +93,28 @@ information from a simple search.
 
 ## `calorie_search`
 
-The second function is called `calorie_search` and it allows the user to
+The second function is called “calorie_search” and it allows the user to
 select a minimum number of calories, maximum number of calories, whether
 they want random results or ordered, and what number of results they
 want. This function has default values for all variables, so they do not
 all have to be specified for the search to execute. It works in a
 similar fashion, where the initial query gets the list of ID numbers to
 be used in a second query to get more data. In this case though, the
-initial nutrition search based on calories gives us some output
-variables like number of calories, grams of carbohydrates, grams of
-protein, and grams of fat that we can bring into the final data set too.
-This function takes in four arguments, which are, in order: 1.
-`calories_from`: the minimum number of calories 2. `calories_to`: the
-maximum number of calories 3. `number` - the maximum number of results
-to return The full code of the function is as follows:
+initial nutrition search based on calories gives us some variables like
+number of calories, grams of carbohydrates, grams of protein, and grams
+of fat that we can bring into the final data set too. The full code of
+the function is as follows:
 
 ``` r
 #This function is a search by calories. User options are (1)Minimum calories, (2)Maximum calories, (3)Whether we want a random set of results or the first ones alphabetically, and a number of results. All of these have defaults, so the user can specify nothing and still get a result.
-calorie_search <- function(calories_from=0, calories_to=5000, number=10){
-  calories_from <- as.character(calories_from)
-  calories_to <- as.character(calories_to)
+calorie_search <- function(min_calories=0, max_calories=5000, random=FALSE, number=10){
+  min_calories <- as.character(min_calories)
+  max_calories <- as.character(max_calories)
   number <- as.character(number)
   search_url <- "https://spoonacular-recipe-food-nutrition-v1.p.rapidapi.com/recipes/findByNutrients"
-    queryString <- list(minCalories = calories_from, maxCalories = calories_to, number=number)
+  if(random==FALSE){
+    queryString <- list(minCalories = min_calories, maxCalories = max_calories, number=number)}
+  else {queryString <- list(minCalories = min_calories, maxCalories = max_calories, random = TRUE)}
   search_result <- VERB("GET", search_url, add_headers('X-RapidAPI-Key' = '73a2057416msh633772bf8275edfp1b3775jsn7e44cc5cb98d', 'X-RapidAPI-Host' = 'spoonacular-recipe-food-nutrition-v1.p.rapidapi.com'), query = queryString, content_type("application/octet-stream"))
   parsed_search_result <- fromJSON(rawToChar(search_result$content))
   id_list <- paste(as.character(parsed_search_result$id), collapse=",")
@@ -139,31 +128,32 @@ bulk_search <- VERB("GET", bulk_url, add_headers('X-RapidAPI-Key' = '73a2057416m
   combined_results <- as_tibble(c(results_df, parsed_search_result[,3:8]))
   return(combined_results)
 }
-calorie_test <- calorie_search(calories_from= 100, calories_to = 500, number=50)
+calorie_test <- calorie_search(min_calories = 100, max_calories = 500, number=50)
 calorie_test
 ```
 
     ## # A tibble: 50 × 18
-    ##        id title          glutenFree dairyFree vegetarian aggregateLikes healthScore weightWatcherSm…
-    ##     <int> <chr>          <lgl>      <lgl>     <lgl>               <int>       <int>            <int>
-    ##  1  17281 Spicy Tuna Ta… TRUE       TRUE      FALSE                   5          71               10
-    ##  2  30338 Spanish-Style… TRUE       TRUE      FALSE                   0         100                2
-    ##  3  51843 Lemon-blueber… FALSE      FALSE     TRUE                   25           2               11
-    ##  4  58965 Mango & Raspb… FALSE      FALSE     TRUE                   30           1               19
-    ##  5  66226 Grapefruit Po… FALSE      FALSE     TRUE                    0           0               12
-    ##  6  70450 Apple Pie Flo… TRUE       FALSE     FALSE                 668           1               19
-    ##  7  90629 Baked Apples … TRUE       FALSE     TRUE                    0           0                3
-    ##  8  94853 Cantaloupe an… TRUE       FALSE     TRUE                    0          22                2
-    ##  9 105012 Grilled Zucch… TRUE       FALSE     FALSE                   1          11                8
-    ## 10 109236 Baby Artichok… TRUE       TRUE      FALSE                   0           5                5
-    ## # … with 40 more rows, and 10 more variables: sourceName <chr>, pricePerServing <dbl>,
-    ## #   readyInMinutes <int>, WW_category <dbl>, image <chr>, imageType <chr>, calories <int>,
+    ##        id title       glutenFree dairyFree vegetarian aggregateLikes healthScore
+    ##     <int> <chr>       <lgl>      <lgl>     <lgl>               <int>       <int>
+    ##  1  17281 Spicy Tuna… TRUE       TRUE      FALSE                   5          71
+    ##  2  30338 Spanish-St… TRUE       TRUE      FALSE                   0         100
+    ##  3  51843 Lemon-blue… FALSE      FALSE     TRUE                   25           2
+    ##  4  58965 Mango & Ra… FALSE      FALSE     TRUE                   30           1
+    ##  5  66226 Grapefruit… FALSE      FALSE     TRUE                    0           0
+    ##  6  70450 Apple Pie … TRUE       FALSE     FALSE                 668           1
+    ##  7  90629 Baked Appl… TRUE       FALSE     TRUE                    0           0
+    ##  8  94853 Cantaloupe… TRUE       FALSE     TRUE                    0          22
+    ##  9 105012 Grilled Zu… TRUE       FALSE     FALSE                   1          11
+    ## 10 109236 Baby Artic… TRUE       TRUE      FALSE                   0           5
+    ## # … with 40 more rows, and 11 more variables: weightWatcherSmartPoints <int>,
+    ## #   sourceName <chr>, pricePerServing <dbl>, readyInMinutes <int>,
+    ## #   WW_category <dbl>, image <chr>, imageType <chr>, calories <int>,
     ## #   protein <chr>, fat <chr>, carbs <chr>
 
-The ingredient_search and calorie_search functions above output a
-variable of “WW_category” This variable did not exist in the source data
-and had to be created using the Weight Watchers Smart Points values. The
-categories utilized are:
+Both of these two search function above included an output variable of
+“WW_category” This variable did not exist in the source data and had to
+be created using the Weight Watchers Smart Points values. The categories
+utilized are:
 
 1.  Low: less than 10
 2.  Medium: 10 to less than 20
@@ -176,17 +166,17 @@ categorization.
 
 The third function is called `search_by_2_nutrs`, and it allows the user
 to search by two nutrients, minimum and maximum levels for both
-nutrients, and a maximum number of results to return. The nutrient
+nutrients, and a maximum number of results to return.The nutrient
 options are grams of carbohydrates, grams of protein, and grams of fat.
-This function takes in seven arguments, which are, in order: 1.
-`first nutrient` - carbohydrates, protein, or fat 2. `first_from` -
-minimum for first nutrient (in grams) 3. `first_to` - minimum for first
-nutrient (in grams) 4. `sec_nutrient` - grams of carbohydrates, grams of
-protein, or grams of fat 5. `sec_from` - minimum for second nutrient (in
-grams) 6. `sec_to` - maximmum for second nutrient (in grams) 7. `number`
-maximum number of results to return For example, if the user likes
-fitness, this function can use to search the nutrients with low calories
-but high protein. The full code of the function is as follows:
+This function takes in seven arguments, which are, in order: 1. first
+nutrient - carbohydrates, protein, or fat 2. first_from - minimum for
+first nutrient (in grams) 3. first_to - minimum for first nutrient (in
+grams) 4. sec_nutrient - grams of carbohydrates, grams of protein, or
+grams of fat 5. sec_from - minimum for second nutrient (in grams) 6.
+sec_to - maximmum for second nutrient (in grams) 7. number maximum
+number of results to return For example, if the user likes fitness, this
+function can use to search the nutrients with low calories but high
+protein. The full code of the function is as follows:
 
 ``` r
 #This function searches based on minimum and maximum levels of two nutrients.
@@ -207,7 +197,7 @@ search_by_2_nutrs <- function(first_nutrient, first_from=0, first_to=5000, sec_n
 # Exploratory Data Analysis
 
 Now that we have set up our functions and run some test searches, we can
-do some exploratory data analysis of the results. First, let’s look at
+do some exploratory data analysis of the results.First, let’s look at
 some contingency tables and bar plots of Weight Watcher points
 categories, grouped by vegetarian to see if vegetarian results tend to
 be lower point values.
@@ -241,7 +231,7 @@ g + geom_bar(aes(fill=vegetarian), position="dodge") +
   labs(title="Bar plot of WW Points for 100-500 Calorie Search", x="WW Smart Points Category")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
+![](Project2_Group_L_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
 
 ``` r
 g <- ggplot(ingredient_test, aes(x=WW_category))
@@ -249,7 +239,7 @@ g + geom_bar(aes(fill=vegetarian), position="dodge") +
   labs(title="Bar plot of WW Points for Ingredient=Cherry", x="WW Smart Points Category")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-18-2.png)<!-- -->
+![](Project2_Group_L_files/figure-gfm/unnamed-chunk-5-2.png)<!-- -->
 
 The most noticeable result here is that we get many more vegetarian
 results with our fruit ingredient choice vs. a calorie-based search.
@@ -267,7 +257,7 @@ g + geom_point() +
   labs(title="Aggregate Likes vs Calories from 100-500 Calorie Search Results", x="Calories", y="Aggregate Likes")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->
+![](Project2_Group_L_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
 
 ``` r
 g <- ggplot(ingredient_test, aes(x=healthScore, y=aggregateLikes))
@@ -275,7 +265,7 @@ g + geom_point() +
   labs(title="Aggregate Likes vs Calories from Cherry Ingredient Search Results", x="Health Score", y="Aggregate Likes")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-19-2.png)<!-- -->
+![](Project2_Group_L_files/figure-gfm/unnamed-chunk-6-2.png)<!-- -->
 
 The most notable result in these plots is that not very many of these
 recipes get very many likes. There are a few clear outliers with many
@@ -292,7 +282,7 @@ g + geom_boxplot()+
   labs(title =  "Boxplot of calories for 100-500 calorie search")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-20-1.png)<!-- -->
+![](Project2_Group_L_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
 
 ``` r
 g <- ggplot(ingredient_test, aes(x=vegetarian, y=healthScore))
@@ -300,7 +290,7 @@ g + geom_boxplot() +
   labs(title =  "Boxplot of health scores for cherry ingredient search")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-20-2.png)<!-- -->
+![](Project2_Group_L_files/figure-gfm/unnamed-chunk-7-2.png)<!-- -->
 
 The plots show a smaller spread of the calorie results for vegetarian
 recipes and some high outliers in the health scores for some of the
@@ -318,7 +308,7 @@ size = 1) +
   labs(title="Histogram of calories for recipes from 100-500 calories")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-21-1.png)<!-- -->
+![](Project2_Group_L_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
 
 ``` r
 #Histogram for health score based on results from the ingredient search
@@ -328,15 +318,15 @@ size = 1) +
   labs(title="Histogram of health scores for recipes with cherry as an ingredient")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-21-2.png)<!-- -->
+![](Project2_Group_L_files/figure-gfm/unnamed-chunk-8-2.png)<!-- -->
 
 The histograms show the results are skewed to the right in both
 distributions with peaks at relatively low numbers of calories and
 health scores.
 
 Moreover, we can search any two nutrients from calories, protein, fat,
-and carbohydrates, to see what recipes what we would like to choose.
-Let’s say we are fitness enthusiasts, and we hope to select food that is
+and carbohydrates, to see the recipes what we would like to choose.
+Let’s say we are fitness enthusiasts, and we hope to choose food that is
 low in calories but high in protein. We can search for a calorie range
 of 0-1500 and a protein range of 30-100. The full code using
 `search_by_2_nutrs` is as follows:
@@ -344,7 +334,11 @@ of 0-1500 and a protein range of 30-100. The full code using
 ``` r
 cal_prot_test <- search_by_2_nutrs(first_nutrient="Calories", first_from=0, first_to=1500,
                                   sec_nutrient="Protein", sec_from=30, sec_to=100, number=100)
+```
 
+    ## No encoding supplied: defaulting to UTF-8.
+
+``` r
 cal_prot_test$protein <- as.numeric(substr(cal_prot_test$protein,1, nchar(cal_prot_test$protein)-1))
 cal_prot_test$fat <- as.numeric(substr(cal_prot_test$fat,1, nchar(cal_prot_test$fat)-1))
 cal_prot_test$carbs <- as.numeric(substr(cal_prot_test$carbs,1, nchar(cal_prot_test$carbs)-1))
@@ -375,7 +369,9 @@ g + geom_point() + geom_smooth(method = lm, col = "Red") +
   labs(title = "Scatter plot of calories vs fat")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-23-1.png)<!-- -->
+    ## `geom_smooth()` using formula 'y ~ x'
+
+![](Project2_Group_L_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
 
 ``` r
 g <- ggplot(cal_prot_test, aes(x = carbs, y = calories))
@@ -383,7 +379,9 @@ g + geom_point() + geom_smooth(method = lm, col = "Red") +
   labs(title = "Scatter plot of calories vs carbohydrates")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-23-2.png)<!-- -->
+    ## `geom_smooth()` using formula 'y ~ x'
+
+![](Project2_Group_L_files/figure-gfm/unnamed-chunk-10-2.png)<!-- -->
 
 According to the plots above, we can see that the calories vs. fat has a
 stronger slope than calories vs. carbohydrates. Therefore, fat has more
@@ -391,10 +389,10 @@ effect on calories than carbohydrates.
 
 We can continue to evaluate calories, fat, carbohydrates to see if there
 are interesting finds. Let’s compare fat to carbohydrates, in order to
-choose food based on fat and carbohydrate levels. First, we’ll add a new
-output variable `calories_level`. This variable did not exist in the
-source data and had to be created using the values of calories. The
-categories utilized are:
+choose food with fat and carbohydrates. Firstly, add a new output
+variable `calories_level`. This variable did not exist in the source
+data and had to be created using the values of calories. The categories
+utilized are:
 
 1.  Low: less than 400
 2.  Medium: 400 to less than 800
@@ -415,23 +413,22 @@ cal_prot_test
 ```
 
     ## # A tibble: 100 × 6
-    ##    calorie_level calories protein   fat carbs title                                                 
-    ##    <fct>            <int>   <dbl> <dbl> <dbl> <chr>                                                 
-    ##  1 medium             214      32     6     7 Steamed Plaice & Spinach Rolls                        
-    ##  2 high               217      32     7     3 Mahi-Mahi With Lemon Caper Sauce                      
-    ##  3 medium             233      44     5     2 Steamed Halibut                                       
-    ##  4 medium             243      33     4    16 Brined Chicken Breast with Sautéed Onion Dipping Sauce
-    ##  5 low                294      30    11    17 Grilled Buffalo Chicken Wraps                         
-    ##  6 medium             337      36    12    23 Spice-Rubbed Lemon Barbecue Salmon                    
-    ##  7 medium             340      38    11    22 Thai Street Vendor Salmon Skewers                     
-    ##  8 medium             343      36    17    12 Blood Orange Sesame Salmon                            
-    ##  9 medium             347      52     6    18 Chicken Fingers                                       
-    ## 10 high               351      31    15    27 Gluten Free Dairy Free Sugar Free Chinese Chicken Sal…
+    ##    calorie_level calories protein   fat carbs title                             
+    ##    <fct>            <int>   <dbl> <dbl> <dbl> <chr>                             
+    ##  1 medium             214      32     6     7 Steamed Plaice & Spinach Rolls    
+    ##  2 high               217      32     7     3 Mahi-Mahi With Lemon Caper Sauce  
+    ##  3 medium             233      44     5     2 Steamed Halibut                   
+    ##  4 medium             243      33     4    16 Brined Chicken Breast with Sautée…
+    ##  5 low                294      30    11    17 Grilled Buffalo Chicken Wraps     
+    ##  6 medium             337      36    12    23 Spice-Rubbed Lemon Barbecue Salmon
+    ##  7 medium             340      38    11    22 Thai Street Vendor Salmon Skewers 
+    ##  8 medium             343      36    17    12 Blood Orange Sesame Salmon        
+    ##  9 medium             347      52     6    18 Chicken Fingers                   
+    ## 10 high               351      31    15    27 Gluten Free Dairy Free Sugar Free…
     ## # … with 90 more rows
 
-Secondly, we’ll add other two output variables `fat_level` and
-`carbs_level`. Both `fat_level` and `carbs_level` categories utilized
-are:
+Secondly, add other two output variables `fat_level` and `carbs_level`.
+Both `fat_level` and `carbs_level` categories utilized are:
 
 1.  Low: less than 40
 2.  Medium: 40 to less than 80
@@ -460,18 +457,18 @@ cal_prot_test
 ```
 
     ## # A tibble: 100 × 8
-    ##    calorie_level calories fat_level   fat carb_level carbs protein title                            
-    ##    <fct>            <int> <fct>     <dbl> <fct>      <dbl>   <dbl> <chr>                            
-    ##  1 medium             891 medium       65 medium         0      71 Instant Pot Buffalo Garlic Butte…
-    ##  2 high               417 low          30 low            1      35 Cheese Pork Chops                
-    ##  3 medium             233 low           5 low            2      44 Steamed Halibut                  
-    ##  4 high               217 low           7 medium         3      32 Mahi-Mahi With Lemon Caper Sauce 
-    ##  5 low                388 low          20 low            3      48 Grilled Lemon Garlic Chicken     
-    ##  6 low                399 low           4 medium         5      81 Super Easy Oven Baked Cod        
-    ##  7 medium             454 medium       33 low            5      33 Fragrant Curried Chicken Salad   
-    ##  8 medium             619 low          49 low            5      35 Pan-Roasted Swordfish with Chopp…
-    ##  9 medium             426 low          31 low            6      31 Easy Slow Cooker Whole Chicken W…
-    ## 10 medium             214 low           6 medium         7      32 Steamed Plaice & Spinach Rolls   
+    ##    calorie_level calories fat_level   fat carb_level carbs protein title        
+    ##    <fct>            <int> <fct>     <dbl> <fct>      <dbl>   <dbl> <chr>        
+    ##  1 medium             891 medium       65 medium         0      71 Instant Pot …
+    ##  2 high               417 low          30 low            1      35 Cheese Pork …
+    ##  3 medium             233 low           5 low            2      44 Steamed Hali…
+    ##  4 high               217 low           7 medium         3      32 Mahi-Mahi Wi…
+    ##  5 low                388 low          20 low            3      48 Grilled Lemo…
+    ##  6 low                399 low           4 medium         5      81 Super Easy O…
+    ##  7 medium             454 medium       33 low            5      33 Fragrant Cur…
+    ##  8 medium             619 low          49 low            5      35 Pan-Roasted …
+    ##  9 medium             426 low          31 low            6      31 Easy Slow Co…
+    ## 10 medium             214 low           6 medium         7      32 Steamed Plai…
     ## # … with 90 more rows
 
 Now, let’s use the contigency tables and bar plots to check the results.
@@ -508,7 +505,7 @@ g + geom_bar(aes(fill = calorie_level), position = "dodge") +
   labs(title = "Bar plot of calorie_level vs fat_level")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-27-1.png)<!-- -->
+![](Project2_Group_L_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
 
 ``` r
 g <- ggplot(cal_prot_test, aes(x = carb_level))
@@ -516,15 +513,15 @@ g + geom_bar(aes(fill = calorie_level), position = "dodge") +
   labs(title = "Bar plot of calorie_level vs carb_level")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-27-2.png)<!-- -->
+![](Project2_Group_L_files/figure-gfm/unnamed-chunk-14-2.png)<!-- -->
 
 From the bar plots above, we can find that for calorie level vs fat
 level, as fat is increasing, counts for all three calorie levels are
-decreasing. For calorie level vs carbohydrate level, as the carbohydrate
-level increases, the counts for medium and high calorie levels are
-decreasing, but the counts for low calorie level increase when moving
-from low carbohydrate level to medium carbohydrate level and then
-decrease from medium carbohydrate level to high carbohydrate level.
+decreasing. For calorie level vs carbohydrate level, as carbohydrates
+increases, the counts for medium and high calorie levels are decreasing,
+but counts for low calorie level increase from low carbohydrate level to
+medium carbohydrate level and then decrease from medium carbohydrate
+level to high carbohydrate level.
 
 # Conclusion
 

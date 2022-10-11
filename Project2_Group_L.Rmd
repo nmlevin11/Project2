@@ -14,10 +14,10 @@ This document is a vignette that describes pulling data from an API and performi
 
 # Required Packages
 The following packages are required for interacting with the functions in this vignette:
-- httr
-- dplyr
-- jsonlite
-- tidyverse
+* httr
+* dplyr
+* jsonlite
+* tidyverse
 
 First, we will load the required packages
 ```{r message=FALSE, warning=FALSE}
@@ -33,7 +33,10 @@ There are three functions that have been created to allow the user to make a sea
 
 ## `ingredient_search`
 
-The first is called `ingredient_search` and it allows the user to select an ingredient and a number of results to return. The function will then provide an output data frame with many points of information for each of the recipes. The function works by first searching for recipes with the ingredient. The ID numbers that the API identifies these recipes by are then plugged into a second search to get a combination of quantitative and categorical data including health scores, aggregate likes, whether a dish is vegetarian, whether it is gluten free, and whether it is dairy free. Full search code is as follows:  
+The first is called `ingredient_search` and it allows the user to select an ingredient and a number of results to return. The function will then provide an output data frame with many points of information for each of the recipes. The function works by first searching for recipes with the specified ingredient. The unique recipe ID numbers that the API uses for identifying these recipes are then plugged into a second search to get a combination of quantitative and categorical data including health scores, aggregate likes, whether a dish is vegetarian, whether it is gluten free, and a few others. The function takes two arguments, which are:
+1. `ingredient` - name of the ingredient
+2. `number` - maximum number of results to return
+Full search code is as follows:  
 
 ```{r}
 #User options for search. Can input: (1)ingredient for search, (2)Number of results
@@ -63,18 +66,20 @@ ingredient_test
 The example search results are for the ingredient "cherry with a maximum number of results of 30. As the output shows, we can get a lot of information from a simple search.  
 
 ## `calorie_search`
-The second function is called "calorie_search" and it allows the user to select a minimum number of calories, maximum number of calories, whether they want random results or ordered, and what number of results they want. This function has default values for all variables, so they do not all have to be specified for the search to execute. It works in a similar fashion, where the initial query gets the list of ID numbers to be used in a second query to get more data. In this case though, the initial nutrition search based on calories gives us some variables like number of calories, grams of carbohydrates, grams of protein, and grams of fat that we can bring into the final data set too. The full code of the function is as follows:  
+The second function is called `calorie_search` and it allows the user to select a minimum number of calories, maximum number of calories, whether they want random results or ordered, and what number of results they want. This function has default values for all variables, so they do not all have to be specified for the search to execute. It works in a similar fashion, where the initial query gets the list of ID numbers to be used in a second query to get more data. In this case though, the initial nutrition search based on calories gives us some output variables like number of calories, grams of carbohydrates, grams of protein, and grams of fat that we can bring into the final data set too. This function takes in four arguments, which are, in order:
+1. `calories_from`: the minimum number of calories
+2. `calories_to`: the maximum number of calories
+3. `number` - the maximum number of results to return
+The full code of the function is as follows:  
 
 ```{r}
 #This function is a search by calories. User options are (1)Minimum calories, (2)Maximum calories, (3)Whether we want a random set of results or the first ones alphabetically, and a number of results. All of these have defaults, so the user can specify nothing and still get a result.
-calorie_search <- function(min_calories=0, max_calories=5000, random=FALSE, number=10){
-  min_calories <- as.character(min_calories)
-  max_calories <- as.character(max_calories)
+calorie_search <- function(calories_from=0, calories_to=5000, number=10){
+  calories_from <- as.character(calories_from)
+  calories_to <- as.character(calories_to)
   number <- as.character(number)
   search_url <- "https://spoonacular-recipe-food-nutrition-v1.p.rapidapi.com/recipes/findByNutrients"
-  if(random==FALSE){
-    queryString <- list(minCalories = min_calories, maxCalories = max_calories, number=number)}
-  else {queryString <- list(minCalories = min_calories, maxCalories = max_calories, random = TRUE)}
+    queryString <- list(minCalories = calories_from, maxCalories = calories_to, number=number)
   search_result <- VERB("GET", search_url, add_headers('X-RapidAPI-Key' = '73a2057416msh633772bf8275edfp1b3775jsn7e44cc5cb98d', 'X-RapidAPI-Host' = 'spoonacular-recipe-food-nutrition-v1.p.rapidapi.com'), query = queryString, content_type("application/octet-stream"))
   parsed_search_result <- fromJSON(rawToChar(search_result$content))
   id_list <- paste(as.character(parsed_search_result$id), collapse=",")
@@ -88,11 +93,11 @@ bulk_search <- VERB("GET", bulk_url, add_headers('X-RapidAPI-Key' = '73a2057416m
   combined_results <- as_tibble(c(results_df, parsed_search_result[,3:8]))
   return(combined_results)
 }
-calorie_test <- calorie_search(min_calories = 100, max_calories = 500, number=50)
+calorie_test <- calorie_search(calories_from= 100, calories_to = 500, number=50)
 calorie_test
 ```
 
-Both of these two search function above included an output variable of "WW_category" This variable did not exist in the source data and had to be created using the Weight Watchers Smart Points values. The categories utilized are: 
+The ingredient_search and calorie_search functions above output a variable of "WW_category" This variable did not exist in the source data and had to be created using the Weight Watchers Smart Points values. The categories utilized are: 
 
 1. Low: less than 10
 2. Medium: 10 to less than 20
@@ -102,10 +107,19 @@ Both of these two search function above included an output variable of "WW_categ
 
 ## `search_by_2_nutrs`
 
-The third function is called `search_by_2_nutrs`, and it allows the user to search by two nutrients and select any range for two nutrients. In this function, the initial nutrients search based on two of choosing among number of calories, grams of carbohydrates, grams of protein, and grams of fat. And the user also can decide how many recipes would like to get. For example, if the user likes fitness, this function can use to search the nutrients with low calories but high protein. The full code of the function is as follows:  
+The third function is called `search_by_2_nutrs`, and it allows the user to search by two nutrients, minimum and maximum levels for both nutrients, and a maximum number of results to return. The nutrient options are grams of carbohydrates, grams of protein, and grams of fat. This function takes in seven arguments, which are, in order: 
+1. `first nutrient` - carbohydrates, protein, or fat
+2. `first_from` - minimum for first nutrient (in grams)
+3. `first_to` - minimum for first nutrient (in grams)
+4. `sec_nutrient` - grams of carbohydrates, grams of protein, or grams of fat
+5. `sec_from` - minimum for second nutrient (in grams)
+6. `sec_to` - maximmum for second nutrient (in grams)
+7. `number`  maximum number of results to return
+For example, if the user likes fitness, this function can use to search the nutrients with low calories but high protein. The full code of the function is as follows:  
 
 ```{r}
-search_by_2_nutrs <- function(first_nutrient, first_from, first_to, sec_nutrient, sec_from, sec_to, number){
+#This function searches based on minimum and maximum levels of two nutrients.
+search_by_2_nutrs <- function(first_nutrient, first_from=0, first_to=5000, sec_nutrient, sec_from=0, sec_to=5000, number=10){
   base<-"https://api.spoonacular.com/recipes/findByNutrients"
   call2 <- paste(base,"?min",first_nutrient,"=",first_from,"&max",first_nutrient,"=", first_to,
                  "&min",sec_nutrient,"=",sec_from,"&max",sec_nutrient,"=", sec_to,
@@ -120,7 +134,7 @@ search_by_2_nutrs <- function(first_nutrient, first_from, first_to, sec_nutrient
 ```
 
 # Exploratory Data Analysis
-Now that we have set up our functions and run some test searches, we can do some exploratory data analysis of the results.First, let's look at some contingency tables and bar plots of Weight Watcher points categories, grouped by vegetarian to see if vegetarian results tend to be lower point values.
+Now that we have set up our functions and run some test searches, we can do some exploratory data analysis of the results. First, let's look at some contingency tables and bar plots of Weight Watcher points categories, grouped by vegetarian to see if vegetarian results tend to be lower point values.
 
 ```{r}
 #Create contingency table from calorie test results
@@ -169,11 +183,13 @@ The plots show a smaller spread of the calorie results for vegetarian recipes an
 One more thing that we could look at are the histogram distributions of calories for the calorie search and health score for the ingredient search results to see if any interesting distributions arise.  
 
 ```{r}
-#Now, here are some histograms
+#Histogram for calories based on results from the calorie search
 g <- ggplot(calorie_test, aes(x=calories))
 g + geom_histogram(bins=10, color = "black", fill = "lightblue",
 size = 1) + 
   labs(title="Histogram of calories for recipes from 100-500 calories")
+
+#Histogram for health score based on results from the ingredient search
 g <- ggplot(ingredient_test, aes(x=healthScore))
 g + geom_histogram(bins=10, color = "black", fill = "lightblue",
 size = 1) + 
@@ -182,7 +198,7 @@ size = 1) +
   
 The histograms show the results are skewed to the right in both distributions with peaks at relatively low numbers of calories and health scores.
 
-Moreover, we can search any two nutrients from calories, protein, fat, carbohydrates, and see the recipes what we would like to choose. Let us take a look if we like fitness, and hope to choose food with low calories but high protein. We can give the calorie range and protein range. The full code using `search_by_2_nutrs` is as follows:
+Moreover, we can search any two nutrients from calories, protein, fat, and carbohydrates, to see what recipes what we would like to choose. Let's say we are fitness enthusiasts, and we hope to select food that is low in calories but high in protein. We can search for a calorie range of 0-1500 and a protein range of 30-100. The full code using `search_by_2_nutrs` is as follows:
 
 ```{r}
 cal_prot_test <- search_by_2_nutrs(first_nutrient="Calories", first_from=0, first_to=1500,
@@ -206,9 +222,9 @@ g + geom_point() + geom_smooth(method = lm, col = "Red") +
   labs(title = "Scatter plot of calories vs carbohydrates")
 ```
 
-According to the plots above, we can see that the fat has a stronger slope for calories than carbohydrates. Therefore, fat has more effect on calories than carbohydrates.
+According to the plots above, we can see that the calories vs. fat has a stronger slope than calories vs. carbohydrates. Therefore, fat has more effect on calories than carbohydrates.
 
-We can continue to evaluate calories, fat, carbohydrates to see if there are interesting finds. We can compare fat to carbohydrates, in order to see how to choose food with fat and carbohydrates. Firstly, add a new output variable `calories_level`. This variable did not exist in the source data and had to be created using the values of calories. The categories utilized are: 
+We can continue to evaluate calories, fat, carbohydrates to see if there are interesting finds. Let's compare fat to carbohydrates, in order to choose food based on fat and carbohydrate levels. First, we'll add a new output variable `calories_level`. This variable did not exist in the source data and had to be created using the values of calories. The categories utilized are: 
 
 1. Low: less than 400
 2. Medium: 400 to less than 800
@@ -227,7 +243,7 @@ cal_prot_test <- cal_prot_test %>%
 cal_prot_test <- cal_prot_test %>% select(calorie_level, calories, protein, fat, carbs, title)
 cal_prot_test
 ```
-Secondly, add other two output variables `fat_level` and `carbs_level`. Both `fat_level` and `carbs_level` categories utilized are: 
+Secondly, we'll add other two output variables `fat_level` and `carbs_level`. Both `fat_level` and `carbs_level` categories utilized are: 
 
 1. Low: less than 40
 2. Medium: 40 to less than 80
@@ -261,7 +277,7 @@ table(cal_prot_test$calorie_level, cal_prot_test$fat_level, dnn=c("calorie_level
 table(cal_prot_test$calorie_level, cal_prot_test$carb_level, dnn=c("calorie_level", "carb_level"))
 ```
 
-Through the tables, we can conclude that medium calorie level with low fat level have the most recipes for choosing calories and fat, and medium calorie level with low carbohydrate level have the most recipes for choosing calories and carbohydrate. In total, medium calorie level with low fat level have the most recipes, which is 46 counts.
+Through the tables, we can conclude that medium calorie level with low fat level have the most recipe options from our search, and medium calorie level with low carbohydrate level have the most recipes options from our search. In total, medium calorie level with low fat level have the most recipes.
 
 ```{r}
 g <- ggplot(cal_prot_test, aes(x = fat_level))
@@ -272,7 +288,7 @@ g + geom_bar(aes(fill = calorie_level), position = "dodge") +
   labs(title = "Bar plot of calorie_level vs carb_level")
 ```
 
-From bar plots above, we can find that for calorie level vs fat level, as fat increasing, all counts for three calorie levels are decreasing. For calorie level vs carbohydrate level, as carbohydrates increasing, the counts for medium and high calorie levels are decreasing, but counts for low calorie level is increasing from low carbohydrate level to medium carbohydrate level then decreasing from medium carbohydrate level to high carbohydrate level.
+From the bar plots above, we can find that for calorie level vs fat level, as fat is increasing,  counts for all three calorie levels are decreasing. For calorie level vs carbohydrate level, as the carbohydrate level increases, the counts for medium and high calorie levels are decreasing, but the counts for low calorie level increase when moving from low carbohydrate level to medium carbohydrate level and then decrease from medium carbohydrate level to high carbohydrate level.
 
 # Conclusion
 We hope that this vignette has given you some insight into working with APIs. In summary, what we did throughout this vignette was build some functions to allow for some flexible user defined searches, ran a few example searches, and did some exploratory data analysis with the results of those searches. Once the functions are built, there is nearly endless data that can be explored. Happy searching!
