@@ -10,7 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 # Introduction
-This document is a vignette that describes pulling data from an API and performing some exploratory data analysis based on those results. This vignette will utilze the Spoonacular food API. More information about this API can be found [here](https://spoonacular.com/food-api) In this vignette, we will be building some functions to interact with the API and doing some exploratory data analysis based on some example search results.  
+This document is a vignette that describes pulling data from an API and performing some exploratory data analysis based on those results. This vignette will utilize the Spoonacular food API. More information about this API can be found [here](https://spoonacular.com/food-api) In this vignette, we will be building some functions to interact with the API and doing some exploratory data analysis based on some example search results.  
 
 # Required Packages
 The following packages are required for interacting with the functions in this vignette:
