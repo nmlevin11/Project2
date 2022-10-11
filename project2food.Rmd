@@ -56,13 +56,13 @@ cal_data
 
 ```{r}
 g_prot_scat <- ggplot(cal_data, aes(x = protein, y = calories))
-g_prot_scat + geom_point()
+g_prot_scat + geom_point() + geom_smooth(method = lm, col = "Red")
 
 g_fat_scat <- ggplot(cal_data, aes(x = fat, y = calories))
-g_fat_scat + geom_point()
+g_fat_scat + geom_point() + geom_smooth(method = lm, col = "Red")
 
 g_carb_scat <- ggplot(cal_data, aes(x = carbs, y = calories))
-g_carb_scat + geom_point()
+g_carb_scat + geom_point() + geom_smooth(method = lm, col = "Red")
 ```
 
 
@@ -112,7 +112,6 @@ search_by_2_nutrs <- function(first_nutrient, first_from, first_to, sec_nutrient
 ```
 
 
-
 ```{r}
 # For people who like fitness, find a certain range calories but high protein
 cal_prot_data <- search_by_2_nutrs(first_nutrient="Calories", first_from=1000, first_to=2500,
@@ -123,10 +122,14 @@ cal_prot_data$fat <- as.numeric(substr(cal_prot_data$fat,1, nchar(cal_prot_data$
 cal_prot_data$carbs <- as.numeric(substr(cal_prot_data$carbs,1, nchar(cal_prot_data$carbs)-1))
 
 cal_prot_data <- cal_prot_data %>% 
+  arrange(fat) %>% 
   mutate(fat_level = ifelse(cal_prot_data$fat >= 80, "3",
                             ifelse(cal_prot_data$fat >= 50,"2",
-                                   ifelse(cal_prot_data$fat >= 0, "1"))),
-         carbs_level = ifelse(cal_prot_data$carbs >= 80, "3",
+                                   ifelse(cal_prot_data$fat >= 0, "1"))))
+
+cal_prot_data <- cal_prot_data %>% 
+  arrange(carbs) %>% 
+  mutate(carbs_level = ifelse(cal_prot_data$carbs >= 80, "3",
                               ifelse(cal_prot_data$carbs >= 50, "2",
                                      ifelse(cal_prot_data$carbs >= 0, "1"))))
 
@@ -137,6 +140,7 @@ cal_prot_data <- cal_prot_data %>%
          carbs_level = factor(carbs_level,
                               level = c(1,2,3),
                               labels = c("low","medium","high")))
+
 ```
 
 
@@ -145,10 +149,49 @@ cal_prot_data <- cal_prot_data %>%
 g_fat_bar <- ggplot(cal_prot_data, aes(x = fat_level))
 g_fat_bar + geom_bar(aes(fill = fat_level), position = "dodge") +
   labs()
-g_carbs_bar <- ggplot(cal_prot_data, aes(x = carbs_level))
-g_carbs_bar + geom_bar(aes(fill = carbs_level), position = "dodge") +
+g_carb_bar <- ggplot(cal_prot_data, aes(x = carbs_level))
+g_carb_bar + geom_bar(aes(fill = carbs_level), position = "dodge") +
   labs()
 ```
+
+```{r}
+# find the calories while having a certain range for carbs and protein
+carb_prot_data <- search_by_2_nutrs(first_nutrient="Carbs", first_from=10, first_to=20,
+                                   sec_nutrient="Protein", sec_from=20, sec_to=30, number=100)
+
+carb_prot_data$protein <- as.numeric(substr(carb_prot_data$protein,1, nchar(carb_prot_data$protein)-1))
+carb_prot_data$fat <- as.numeric(substr(carb_prot_data$fat,1, nchar(carb_prot_data$fat)-1))
+carb_prot_data$carbs <- as.numeric(substr(carb_prot_data$carbs,1, nchar(carb_prot_data$carbs)-1))
+
+carb_prot_data <- carb_prot_data %>% 
+  arrange(calories) %>% 
+  mutate(calories_level = ifelse(carb_prot_data$calories >= 500, "3",
+                              ifelse(carb_prot_data$calories >= 300, "2",
+                                     ifelse(carb_prot_data$calories >= 100, "1"))))
+
+carb_prot_data <- carb_prot_data %>% 
+  mutate(calories_level = factor(calories_level,
+                              level = c(1,2,3),
+                              labels = c("low","medium","high")))
+
+carb_prot_data <- carb_prot_data %>% select(calories_level, protein, carbs)
+carb_prot_data
+```
+
+```{r}
+g_box1 <- ggplot(carb_prot_data, aes(x = calories_level, y = protein))
+g_box1 + geom_boxplot() +
+     geom_point(alpha = 1, size = 2, position = "jitter") +
+     labs()
+
+g_box2 <- ggplot(carb_prot_data, aes(x = calories_level, y = carbs))
+g_box2 + geom_boxplot() +
+     geom_point(alpha = 1, size = 2, position = "jitter") +
+     labs()
+
+```
+
+
 
 ```{r}
 table(cal_prot_data$fat_level)
@@ -161,14 +204,5 @@ table(cal_prot_data$carbs_level)
 ```{r}
 table(cal_prot_data$fat_level, cal_prot_data$carbs_level)
 ```
-
-
-
-
-
-
-
-
-
 
 
