@@ -35,8 +35,10 @@ There are three functions that have been created to allow the user to make a sea
 ## `ingredient_search`
 
 The first is called `ingredient_search` and it allows the user to select an ingredient and a number of results to return. The function will then provide an output data frame with many points of information for each of the recipes. The function works by first searching for recipes with the specified ingredient. The unique recipe ID numbers that the API uses for identifying these recipes are then plugged into a second search to get a combination of quantitative and categorical data including health scores, aggregate likes, whether a dish is vegetarian, whether it is gluten free, and a few others. The function takes two arguments, which are:
+
 1. `ingredient` - name of the ingredient
 2. `number` - maximum number of results to return
+
 Full search code is as follows:  
 
 ```{r}
@@ -68,9 +70,11 @@ The example search results are for the ingredient "cherry with a maximum number 
 
 ## `calorie_search`
 The second function is called `calorie_search` and it allows the user to select a minimum number of calories, maximum number of calories, whether they want random results or ordered, and what number of results they want. This function has default values for all variables, so they do not all have to be specified for the search to execute. It works in a similar fashion, where the initial query gets the list of ID numbers to be used in a second query to get more data. In this case though, the initial nutrition search based on calories gives us some output variables like number of calories, grams of carbohydrates, grams of protein, and grams of fat that we can bring into the final data set too. This function takes in four arguments, which are, in order:
+
 1. `calories_from`: the minimum number of calories
 2. `calories_to`: the maximum number of calories
 3. `number` - the maximum number of results to return
+
 The full code of the function is as follows:  
 
 ```{r}
@@ -109,6 +113,7 @@ The ingredient_search and calorie_search functions above output a variable of "W
 ## `search_by_2_nutrs`
 
 The third function is called `search_by_2_nutrs`, and it allows the user to search by two nutrients, minimum and maximum levels for both nutrients, and a maximum number of results to return. The nutrient options are grams of carbohydrates, grams of protein, and grams of fat. This function takes in seven arguments, which are, in order: 
+
 1. `first nutrient` - carbohydrates, protein, or fat
 2. `first_from` - minimum for first nutrient (in grams)
 3. `first_to` - minimum for first nutrient (in grams)
@@ -116,6 +121,7 @@ The third function is called `search_by_2_nutrs`, and it allows the user to sear
 5. `sec_from` - minimum for second nutrient (in grams)
 6. `sec_to` - maximmum for second nutrient (in grams)
 7. `number`  maximum number of results to return
+
 For example, if the user likes fitness, this function can use to search the nutrients with low calories but high protein. The full code of the function is as follows:  
 
 ```{r}
@@ -179,7 +185,7 @@ g + geom_boxplot() +
   labs(title =  "Boxplot of health scores for cherry ingredient search")
 ```
   
-The plots show a smaller spread of the calorie results for vegetarian recipes and some high outliers in the health scores for some of the vegetarian results with cherry as an ingredient.  
+The plots show a smaller spread of the calorie results for vegetarian recipes and some high outliers in the health scores for some of the vegetarian results with cherry as an ingredient.
 
 One more thing that we could look at are the histogram distributions of calories for the calorie search and health score for the ingredient search results to see if any interesting distributions arise.  
 
@@ -225,7 +231,7 @@ g + geom_point() + geom_smooth(method = lm, col = "Red") +
 
 According to the plots above, we can see that the calories vs. fat has a stronger slope than calories vs. carbohydrates. Therefore, fat has more effect on calories than carbohydrates.
 
-We can continue to evaluate calories, fat, carbohydrates to see if there are interesting finds. Let's compare fat to carbohydrates, in order to choose food based on fat and carbohydrate levels. First, we'll add a new output variable `calories_level`. This variable did not exist in the source data and had to be created using the values of calories. The categories utilized are: 
+We can continue to evaluate calories, fat, carbohydrates to see if there are interesting finds. Let's compare fat to carbohydrates, in order to choose food based on fat and carbohydrate levels. First, we will add a new output variable `calories_level`. This variable did not exist in the source data and had to be created using the values of calories. The categories utilized are: 
 
 1. Low: less than 400
 2. Medium: 400 to less than 800

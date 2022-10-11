@@ -58,8 +58,12 @@ identifying these recipes are then plugged into a second search to get a
 combination of quantitative and categorical data including health
 scores, aggregate likes, whether a dish is vegetarian, whether it is
 gluten free, and a few others. The function takes two arguments, which
-are: 1. `ingredient` - name of the ingredient 2. `number` - maximum
-number of results to return Full search code is as follows:
+are:
+
+1.  `ingredient` - name of the ingredient
+2.  `number` - maximum number of results to return
+
+Full search code is as follows:
 
 ``` r
 #User options for search. Can input: (1)ingredient for search, (2)Number of results
@@ -118,10 +122,13 @@ be used in a second query to get more data. In this case though, the
 initial nutrition search based on calories gives us some output
 variables like number of calories, grams of carbohydrates, grams of
 protein, and grams of fat that we can bring into the final data set too.
-This function takes in four arguments, which are, in order: 1.
-`calories_from`: the minimum number of calories 2. `calories_to`: the
-maximum number of calories 3. `number` - the maximum number of results
-to return The full code of the function is as follows:
+This function takes in four arguments, which are, in order:
+
+1.  `calories_from`: the minimum number of calories
+2.  `calories_to`: the maximum number of calories
+3.  `number` - the maximum number of results to return
+
+The full code of the function is as follows:
 
 ``` r
 #This function is a search by calories. User options are (1)Minimum calories, (2)Maximum calories, (3)Whether we want a random set of results or the first ones alphabetically, and a number of results. All of these have defaults, so the user can specify nothing and still get a result.
@@ -183,15 +190,20 @@ The third function is called `search_by_2_nutrs`, and it allows the user
 to search by two nutrients, minimum and maximum levels for both
 nutrients, and a maximum number of results to return. The nutrient
 options are grams of carbohydrates, grams of protein, and grams of fat.
-This function takes in seven arguments, which are, in order: 1.
-`first nutrient` - carbohydrates, protein, or fat 2. `first_from` -
-minimum for first nutrient (in grams) 3. `first_to` - minimum for first
-nutrient (in grams) 4. `sec_nutrient` - grams of carbohydrates, grams of
-protein, or grams of fat 5. `sec_from` - minimum for second nutrient (in
-grams) 6. `sec_to` - maximmum for second nutrient (in grams) 7. `number`
-maximum number of results to return For example, if the user likes
-fitness, this function can use to search the nutrients with low calories
-but high protein. The full code of the function is as follows:
+This function takes in seven arguments, which are, in order:
+
+1.  `first nutrient` - carbohydrates, protein, or fat
+2.  `first_from` - minimum for first nutrient (in grams)
+3.  `first_to` - minimum for first nutrient (in grams)
+4.  `sec_nutrient` - grams of carbohydrates, grams of protein, or grams
+    of fat
+5.  `sec_from` - minimum for second nutrient (in grams)
+6.  `sec_to` - maximmum for second nutrient (in grams)
+7.  `number` maximum number of results to return
+
+For example, if the user likes fitness, this function can use to search
+the nutrients with low calories but high protein. The full code of the
+function is as follows:
 
 ``` r
 #This function searches based on minimum and maximum levels of two nutrients.
@@ -396,8 +408,8 @@ effect on calories than carbohydrates.
 
 We can continue to evaluate calories, fat, carbohydrates to see if there
 are interesting finds. Let’s compare fat to carbohydrates, in order to
-choose food based on fat and carbohydrate levels. First, we’ll add a new
-output variable `calories_level`. This variable did not exist in the
+choose food based on fat and carbohydrate levels. First, we will add a
+new output variable `calories_level`. This variable did not exist in the
 source data and had to be created using the values of calories. The
 categories utilized are:
 

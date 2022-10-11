@@ -645,9 +645,12 @@ ID numbers that the API uses for identifying these recipes are then
 plugged into a second search to get a combination of quantitative and
 categorical data including health scores, aggregate likes, whether a
 dish is vegetarian, whether it is gluten free, and a few others. The
-function takes two arguments, which are: 1. <code>ingredient</code> -
-name of the ingredient 2. <code>number</code> - maximum number of
-results to return Full search code is as follows:</p>
+function takes two arguments, which are:</p>
+<ol style="list-style-type: decimal">
+<li><code>ingredient</code> - name of the ingredient</li>
+<li><code>number</code> - maximum number of results to return</li>
+</ol>
+<p>Full search code is as follows:</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">#User options for search. Can input: (1)ingredient for search, (2)Number of results</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>ingredient_search <span class="ot">&lt;-</span> <span class="cf">function</span>(ingredient, <span class="at">number=</span><span class="dv">10</span>){</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  ingredient <span class="ot">&lt;-</span> <span class="fu">tolower</span>(ingredient)</span>
@@ -700,10 +703,13 @@ this case though, the initial nutrition search based on calories gives
 us some output variables like number of calories, grams of
 carbohydrates, grams of protein, and grams of fat that we can bring into
 the final data set too. This function takes in four arguments, which
-are, in order: 1. <code>calories_from</code>: the minimum number of
-calories 2. <code>calories_to</code>: the maximum number of calories 3.
-<code>number</code> - the maximum number of results to return The full
-code of the function is as follows:</p>
+are, in order:</p>
+<ol style="list-style-type: decimal">
+<li><code>calories_from</code>: the minimum number of calories</li>
+<li><code>calories_to</code>: the maximum number of calories</li>
+<li><code>number</code> - the maximum number of results to return</li>
+</ol>
+<p>The full code of the function is as follows:</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">#This function is a search by calories. User options are (1)Minimum calories, (2)Maximum calories, (3)Whether we want a random set of results or the first ones alphabetically, and a number of results. All of these have defaults, so the user can specify nothing and still get a result.</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>calorie_search <span class="ot">&lt;-</span> <span class="cf">function</span>(<span class="at">calories_from=</span><span class="dv">0</span>, <span class="at">calories_to=</span><span class="dv">5000</span>, <span class="at">number=</span><span class="dv">10</span>){</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  calories_from <span class="ot">&lt;-</span> <span class="fu">as.character</span>(calories_from)</span>
@@ -758,17 +764,20 @@ this categorization.</p>
 allows the user to search by two nutrients, minimum and maximum levels
 for both nutrients, and a maximum number of results to return. The
 nutrient options are grams of carbohydrates, grams of protein, and grams
-of fat. This function takes in seven arguments, which are, in order: 1.
-<code>first nutrient</code> - carbohydrates, protein, or fat 2.
-<code>first_from</code> - minimum for first nutrient (in grams) 3.
-<code>first_to</code> - minimum for first nutrient (in grams) 4.
-<code>sec_nutrient</code> - grams of carbohydrates, grams of protein, or
-grams of fat 5. <code>sec_from</code> - minimum for second nutrient (in
-grams) 6. <code>sec_to</code> - maximmum for second nutrient (in grams)
-7. <code>number</code> maximum number of results to return For example,
-if the user likes fitness, this function can use to search the nutrients
-with low calories but high protein. The full code of the function is as
-follows:</p>
+of fat. This function takes in seven arguments, which are, in order:</p>
+<ol style="list-style-type: decimal">
+<li><code>first nutrient</code> - carbohydrates, protein, or fat</li>
+<li><code>first_from</code> - minimum for first nutrient (in grams)</li>
+<li><code>first_to</code> - minimum for first nutrient (in grams)</li>
+<li><code>sec_nutrient</code> - grams of carbohydrates, grams of
+protein, or grams of fat</li>
+<li><code>sec_from</code> - minimum for second nutrient (in grams)</li>
+<li><code>sec_to</code> - maximmum for second nutrient (in grams)</li>
+<li><code>number</code> maximum number of results to return</li>
+</ol>
+<p>For example, if the user likes fitness, this function can use to
+search the nutrients with low calories but high protein. The full code
+of the function is as follows:</p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">#This function searches based on minimum and maximum levels of two nutrients.</span></span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>search_by_2_nutrs <span class="ot">&lt;-</span> <span class="cf">function</span>(first_nutrient, <span class="at">first_from=</span><span class="dv">0</span>, <span class="at">first_to=</span><span class="dv">5000</span>, sec_nutrient, <span class="at">sec_from=</span><span class="dv">0</span>, <span class="at">sec_to=</span><span class="dv">5000</span>, <span class="at">number=</span><span class="dv">10</span>){</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  base<span class="ot">&lt;-</span><span class="st">&quot;https://api.spoonacular.com/recipes/findByNutrients&quot;</span></span>
@@ -905,10 +914,10 @@ has a stronger slope than calories vs. carbohydrates. Therefore, fat has
 more effect on calories than carbohydrates.</p>
 <p>We can continue to evaluate calories, fat, carbohydrates to see if
 there are interesting finds. Let’s compare fat to carbohydrates, in
-order to choose food based on fat and carbohydrate levels. First, we’ll
-add a new output variable <code>calories_level</code>. This variable did
-not exist in the source data and had to be created using the values of
-calories. The categories utilized are:</p>
+order to choose food based on fat and carbohydrate levels. First, we
+will add a new output variable <code>calories_level</code>. This
+variable did not exist in the source data and had to be created using
+the values of calories. The categories utilized are:</p>
 <ol style="list-style-type: decimal">
 <li>Low: less than 400</li>
 <li>Medium: 400 to less than 800</li>
