@@ -278,6 +278,8 @@ table(cal_prot_test$calorie_level, cal_prot_test$fat_level, dnn=c("calorie_level
 table(cal_prot_test$calorie_level, cal_prot_test$carb_level, dnn=c("calorie_level", "carb_level"))
 ```
 
+Through two contingency tables above, we can conclude that medium calorie level with low fat level have the most recipe options from our search, and medium calorie level with low carbohydrate level have the most recipes options from our search. In total, medium calorie level with low fat level have the most recipes.
+
 ```{r}
 calorie_mean_fat <- cal_prot_test %>%
   group_by(fat_level) %>%
@@ -292,7 +294,7 @@ calorie_mean_carb <- cal_prot_test %>%
 calorie_mean_carb
 ```
 
-Through the tables, we can conclude that medium calorie level with low fat level have the most recipe options from our search, and medium calorie level with low carbohydrate level have the most recipes options from our search. In total, medium calorie level with low fat level have the most recipes.
+According to the tables above, we can find that, as the fat level increasing, the calorie means for each level are increasing. However, the carbohydrate is opposite, as the carbohydrate level increasing, the calorie means for each level are decreasing.
 
 ```{r}
 g <- ggplot(cal_prot_test, aes(x = fat_level))
