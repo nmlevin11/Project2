@@ -259,7 +259,7 @@ g + geom_bar(aes(fill=vegetarian), position="dodge") +
   labs(title="Bar plot of WW Points for 100-500 Calorie Search", x="WW Smart Points Category")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
 
 ``` r
 g <- ggplot(ingredient_test, aes(x=WW_category))
@@ -267,7 +267,7 @@ g + geom_bar(aes(fill=vegetarian), position="dodge") +
   labs(title="Bar plot of WW Points for Ingredient=Cherry", x="WW Smart Points Category")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-16-2.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-5-2.png)<!-- -->
 
 The most noticeable result here is that we get many more vegetarian
 results with our fruit ingredient choice vs. a calorie-based search.
@@ -285,7 +285,7 @@ g + geom_point() +
   labs(title="Aggregate Likes vs Calories from 100-500 Calorie Search Results", x="Calories", y="Aggregate Likes")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
 
 ``` r
 g <- ggplot(ingredient_test, aes(x=healthScore, y=aggregateLikes))
@@ -293,7 +293,7 @@ g + geom_point() +
   labs(title="Aggregate Likes vs Calories from Cherry Ingredient Search Results", x="Health Score", y="Aggregate Likes")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-17-2.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-6-2.png)<!-- -->
 
 The most notable result in these plots is that not very many of these
 recipes get very many likes. There are a few clear outliers with many
@@ -310,7 +310,7 @@ g + geom_boxplot()+
   labs(title =  "Boxplot of calories for 100-500 calorie search")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
 
 ``` r
 g <- ggplot(ingredient_test, aes(x=vegetarian, y=healthScore))
@@ -318,7 +318,7 @@ g + geom_boxplot() +
   labs(title =  "Boxplot of health scores for cherry ingredient search")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-18-2.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-7-2.png)<!-- -->
 
 The plots show a smaller spread of the calorie results for vegetarian
 recipes and some high outliers in the health scores for some of the
@@ -336,7 +336,7 @@ size = 1) +
   labs(title="Histogram of calories for recipes from 100-500 calories")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
 
 ``` r
 #Histogram for health score based on results from the ingredient search
@@ -346,7 +346,7 @@ size = 1) +
   labs(title="Histogram of health scores for recipes with cherry as an ingredient")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-19-2.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-8-2.png)<!-- -->
 
 The histograms show the results are skewed to the right in both
 distributions with peaks at relatively low numbers of calories and
@@ -392,7 +392,7 @@ g + geom_point() + geom_smooth(method = lm, col = "Red") +
   labs(title = "Scatter plot of calories vs fat")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-21-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
 
 ``` r
 g <- ggplot(cal_prot_test, aes(x = carbs, y = calories))
@@ -400,7 +400,7 @@ g + geom_point() + geom_smooth(method = lm, col = "Red") +
   labs(title = "Scatter plot of calories vs carbohydrates")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-21-2.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-10-2.png)<!-- -->
 
 According to the plots above, we can see that the calories vs. fat has a
 stronger slope than calories vs. carbohydrates. Therefore, fat has more
@@ -556,7 +556,7 @@ g + geom_bar(aes(fill = calorie_level), position = "dodge") +
   labs(title = "Bar plot of calorie_level vs fat_level")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-27-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
 
 ``` r
 g <- ggplot(cal_prot_test, aes(x = carb_level))
@@ -564,7 +564,7 @@ g + geom_bar(aes(fill = calorie_level), position = "dodge") +
   labs(title = "Bar plot of calorie_level vs carb_level")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-27-2.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-16-2.png)<!-- -->
 
 From the bar plots above, we can find that for calorie level vs fat
 level, as fat is increasing, counts for all three calorie levels are

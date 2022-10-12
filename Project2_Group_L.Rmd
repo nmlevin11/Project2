@@ -1,5 +1,5 @@
 ---
-title: "Project 2"
+title: "Spoonacular Food API Vignette"
 author: "Nicole Levin, Shaoyu Wang"
 date: "2022-10-11"
 output: github_document
