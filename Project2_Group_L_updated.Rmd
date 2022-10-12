@@ -57,8 +57,8 @@ queryString <- list(ids = id_list)
 bulk_search <- VERB("GET", bulk_url, add_headers('X-RapidAPI-Key' = '73a2057416msh633772bf8275edfp1b3775jsn7e44cc5cb98d', 'X-RapidAPI-Host' = 'spoonacular-recipe-food-nutrition-v1.p.rapidapi.com'), query = queryString, content_type("application/octet-stream"))
   parsed_bulk_search <- fromJSON(rawToChar(bulk_search$content))
   results_df <- as_tibble(parsed_bulk_search) %>% select(id, title, glutenFree, dairyFree, vegetarian, aggregateLikes, healthScore, weightWatcherSmartPoints, sourceName, pricePerServing, readyInMinutes)
-  combined_results <- results_df %>% mutate(WW_category = if_else(weightWatcherSmartPoints <10, 1, if_else(weightWatcherSmartPoints <20, 2, 3))) 
-  factor(combined_results$WW_category, levels = c(1, 2, 3), labels = c("low", "medium", "high"))
+  combined_results <- results_df %>% mutate(WW_category = if_else(weightWatcherSmartPoints <10, 1, if_else(weightWatcherSmartPoints <20, 2, 3)))
+  combined_results$WW_category = factor(combined_results$WW_category, levels = c(1, 2, 3), labels = c("low", "medium", "high"))
 return(combined_results)
 }
 #Run a test
@@ -94,10 +94,12 @@ bulk_search <- VERB("GET", bulk_url, add_headers('X-RapidAPI-Key' = '73a2057416m
   parsed_bulk_search <- fromJSON(rawToChar(bulk_search$content))
   results_df <- as_tibble(parsed_bulk_search) %>% select(id, title, glutenFree, dairyFree, vegetarian, aggregateLikes, healthScore, weightWatcherSmartPoints, sourceName, pricePerServing, readyInMinutes)
   results_df <- results_df %>% mutate(WW_category = if_else(weightWatcherSmartPoints <10, 1, if_else(weightWatcherSmartPoints <20, 2, 3))) 
-  factor(results_df$WW_category, levels = c(1, 2, 3), labels = c("low", "medium", "high"))
-  combined_results <- as_tibble(c(results_df, parsed_search_result[,3:8]))
+  results_df$WW_category = factor(results_df$WW_category, levels = c(1, 2, 3), labels = c("low", "medium", "high"))
+  combined_results <- as_tibble(c(results_df, parsed_search_result[,5:8]))
   return(combined_results)
 }
+
+#Run a test
 calorie_test <- calorie_search(calories_from= 100, calories_to = 500, number=50)
 calorie_test
 ```
@@ -278,7 +280,7 @@ table(cal_prot_test$calorie_level, cal_prot_test$fat_level, dnn=c("calorie_level
 table(cal_prot_test$calorie_level, cal_prot_test$carb_level, dnn=c("calorie_level", "carb_level"))
 ```
 
-Through two contingency tables above, we can conclude that medium calorie level with low fat level have the most recipe options from our search, and medium calorie level with low carbohydrate level have the most recipes options from our search. In total, medium calorie level with low fat level have the most recipes.
+Through the two contingency tables above, we can conclude that medium calorie level with low fat level have the most recipe options from our search, and medium calorie level with low carbohydrate level have the most recipes options from our search. In total, medium calorie level with low fat level have the most recipes.
 
 ```{r}
 calorie_mean_fat <- cal_prot_test %>%
@@ -294,7 +296,7 @@ calorie_mean_carb <- cal_prot_test %>%
 calorie_mean_carb
 ```
 
-According to the tables above, we can find that, as the fat level increasing, the calorie means for each level are increasing. But the carbohydrate is opposite, as the carbohydrate level increasing, the calorie means for each level are decreasing.
+According to the tables above, we can find that, as the fat level increases, the calorie means for each level are increasing. For carbohydrates, we see the opposite, as the carbohydrate level increasing, the calorie means for each level are decreasing. That would be an interesting result to explore further in a deeper analysis.
 
 ```{r}
 g <- ggplot(cal_prot_test, aes(x = fat_level))
