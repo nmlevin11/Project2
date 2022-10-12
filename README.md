@@ -1,4 +1,4 @@
-Project 2
+Spoonacular Food API Vignette
 ================
 Nicole Levin, Shaoyu Wang
 2022-10-12
