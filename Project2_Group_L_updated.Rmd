@@ -294,7 +294,7 @@ calorie_mean_carb <- cal_prot_test %>%
 calorie_mean_carb
 ```
 
-According to the tables above, we can find that, as the fat level increasing, the calorie means for each level are increasing. However, the carbohydrate is opposite, as the carbohydrate level increasing, the calorie means for each level are decreasing.
+According to the tables above, we can find that, as the fat level increasing, the calorie means for each level are increasing. But the carbohydrate is opposite, as the carbohydrate level increasing, the calorie means for each level are decreasing.
 
 ```{r}
 g <- ggplot(cal_prot_test, aes(x = fat_level))
